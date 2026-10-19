@@ -1,0 +1,89 @@
+[project]
+name = "tech-amharic"
+version = "0.1.0"
+description = "An open, reviewed, concept-oriented termbase for computing and technology terms in Amharic."
+readme = "README.md"
+license = "Apache-2.0"
+authors = [{ name = "Milael Mekonnen Deneke" }]
+requires-python = ">=3.12"
+keywords = ["amharic", "terminology", "termbase", "tbx", "nlp", "localization"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: Amharic",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Localization",
+    "Topic :: Text Processing :: Linguistic",
+]
+# The CLI lookup path ("tam lookup/search/export") only needs these two,
+# so `uv tool install tech-amharic` stays light.
+dependencies = [
+    "typer>=0.16",
+    "httpx>=0.28",
+]
+
+[project.optional-dependencies]
+# Everything needed to run the API, web UI and database.
+server = [
+    "fastapi>=0.118",
+    "uvicorn[standard]>=0.34",
+    "sqlalchemy>=2.0.40",
+    "alembic>=1.16",
+    "psycopg[binary]>=3.2",
+    "pydantic-settings>=2.9",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.20",
+]
+# Building the Hugging Face dataset (Parquet).
+dataset = ["pyarrow>=20"]
+
+[project.scripts]
+tam = "tech_amharic.cli:app"
+
+[project.urls]
+Repository = "https://github.com/<your-github-user>/tech-amharic"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4",
+    "ruff>=0.12",
+    "mypy>=1.16",
+]
+
+[build-system]
+requires = ["uv_build>=0.8,<0.12"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "tech_amharic"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = ["server: needs the server extras (FastAPI, SQLAlchemy)"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "S", "RUF"]
+ignore = [
+    "S101",                       # assert is fine in tests
+    "RUF001", "RUF002", "RUF003", # Ge'ez letters are not "ambiguous" in an Amharic project
+]
+
+[tool.ruff.lint.isort]
+# The local alembic/ migrations folder would otherwise make ruff treat the
+# alembic package as first-party.
+known-third-party = ["alembic"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S314"]
+"alembic/**" = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]

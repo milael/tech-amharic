@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% set headword = (terms_by_lang["en"]|selectattr("status", "equalto", TermStatus.PREFERRED)|first) %}
+{% block title %}{{ headword.text if headword else concept.slug }} · Tech-Amharic{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/?domain={{ concept.domain }}">{{ DOMAINS.get(concept.domain, concept.domain) }}</a>{% if concept.subdomain %} · {{ concept.subdomain }}{% endif %}</p>
+<h1>{{ headword.text if headword else concept.slug }}</h1>
+
+{% if msg %}<p class="flash" role="status">{{ msg }}</p>{% endif %}
+
+{% if concept.definition_en %}<p class="definition">{{ concept.definition_en }}</p>{% endif %}
+{% if concept.definition_am %}<p class="definition am-text" lang="am">{{ concept.definition_am }}</p>{% endif %}
+{% if concept.note %}<p class="note">{{ concept.note }}</p>{% endif %}
+
+<section>
+  <h2>Amharic</h2>
+  {% if terms_by_lang["am"] %}
+  <table class="terms">
+    <thead><tr><th>Term</th><th>Status</th><th>Formation</th><th>Votes</th></tr></thead>
+    <tbody>
+    {% for t in terms_by_lang["am"] %}
+      <tr>
+        <td class="am-text" lang="am">{{ t.text }}{% if t.note %}<div class="small muted">{{ t.note }}</div>{% endif %}
+          {% for s in t.sources %}<div class="small muted">Source: {{ s.citation }}</div>{% endfor %}
+        </td>
+        <td><span class="badge s-{{ t.status.value }}">{{ STATUS_LABELS[t.status.value] }}</span></td>
+        <td>{{ t.formation.value if t.formation else "—" }}</td>
+        <td class="votes">
+          <span class="score" id="score-{{ t.id }}">{{ "%+d"|format(t.score) }}</span>
+          {% if user %}
+          <form method="post" action="/terms/{{ t.id }}/vote" class="inline" hx-post="/terms/{{ t.id }}/vote" hx-target="#score-{{ t.id }}" hx-swap="outerHTML">
+            <button name="value" value="1" aria-label="Vote up">▲</button>
+            <button name="value" value="-1" aria-label="Vote down">▼</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% if is_reviewer and allowed(t) %}
+      <tr class="review-row"><td colspan="4">
+        <form method="post" action="/terms/{{ t.id }}/review" class="review-form">
+          <select name="decision" aria-label="Decision">
+            {% for d in allowed(t) %}<option value="{{ d }}">{{ d.replace("_", " ")|capitalize }}</option>{% endfor %}
+          </select>
+          <input name="comment" placeholder="Comment (required to reject, request changes or deprecate)" maxlength="2000">
+          <button>Record decision</button>
+        </form>
+      </td></tr>
+      {% endif %}
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No Amharic term proposed yet.</p>
+  {% endif %}
+</section>
+
+{% if user %}
+<section>
+  <h2>Propose an Amharic term</h2>
+  <form method="post" action="/c/{{ concept.slug }}/propose" class="stack">
+    <label>Term <input name="text" required maxlength="255" lang="am"></label>
+    <label>How was it formed?
+      <select name="formation">
+        <option value="">Not sure</option>
+        {% for f in Formation %}<option value="{{ f.value }}">{{ f.value }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Where have you seen it used? <input name="citation" maxlength="1000" placeholder="Book, course, site, or 'my own coinage'"></label>
+    <label>Note <textarea name="note" rows="2" maxlength="2000"></textarea></label>
+    <button>Submit proposal</button>
+  </form>
+</section>
+{% endif %}
+
+<section>
+  <h2>English</h2>
+  <ul class="plain">
+    {% for t in terms_by_lang["en"] %}<li>{{ t.text }} <span class="badge s-{{ t.status.value }}">{{ STATUS_LABELS[t.status.value] }}</span></li>{% endfor %}
+  </ul>
+</section>
+
+{% set history = concept.terms|map(attribute="reviews")|sum(start=[]) %}
+{% if history %}
+<section>
+  <h2>Review history</h2>
+  <ul class="history">
+    {% for r in history|sort(attribute="created_at", reverse=True) %}
+      <li><span class="am-text" lang="am">{{ r.term.text }}</span>: {{ r.decision.value.replace("_", " ") }} by {{ r.reviewer.handle if r.reviewer else "former reviewer" }}{% if r.comment %} — “{{ r.comment }}”{% endif %} <span class="muted small">{{ r.created_at.strftime("%Y-%m-%d") }}</span></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

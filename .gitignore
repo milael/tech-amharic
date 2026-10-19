@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+.venv-local/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+*.db
+.env
+eval-report*.json

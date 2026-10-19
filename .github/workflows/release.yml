@@ -1,0 +1,39 @@
+name: Release data
+
+# Tag v0.1.0 (etc.) to publish the bundle, TBX, CSV and dataset files.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env: { POSTGRES_USER: tam, POSTGRES_PASSWORD: tam, POSTGRES_DB: tam }
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U tam" --health-interval 5s --health-retries 10
+    env:
+      TAM_DATABASE_URL: postgresql+psycopg://tam:tam@localhost:5432/tam
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --all-extras --locked
+      - run: uv run alembic upgrade head
+      # Git data is the reviewed source of record: build the release from it.
+      - run: uv run tam admin import data/concepts
+      - run: uv run tam admin build --out dist/release --version "${GITHUB_REF_NAME#v}"
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" --generate-notes \
+            dist/release/bundle.json dist/release/tech-amharic.tbx dist/release/tech-amharic.csv \
+            dist/release/dataset/*
+      # Uncomment once the Hugging Face dataset repo and HF_TOKEN secret exist:
+      # - run: uvx --from huggingface_hub hf upload <your-hf-user>/tech-amharic dist/release/dataset . --repo-type dataset
+      #   env: { HF_TOKEN: "${{ secrets.HF_TOKEN }}" }

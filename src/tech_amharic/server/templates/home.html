@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="intro">
+  <h1>Technology terms in Amharic, reviewed by people who use them.</h1>
+  <p class="muted">{{ stats.concepts }} concepts · {{ stats.published }} reviewed Amharic terms · {{ stats.proposed }} awaiting review</p>
+</section>
+
+<form class="search" action="/" method="get" role="search">
+  <label class="visually-hidden" for="q">Search in English or Amharic</label>
+  <input id="q" name="q" type="search" value="{{ q }}" autocomplete="off"
+         placeholder="Search in English or Amharic, e.g. encryption or ምስጠራ"
+         hx-get="/" hx-trigger="input changed delay:250ms, search"
+         hx-target="#results" hx-include="[name=domain]" hx-push-url="true">
+  <input type="hidden" name="domain" value="{{ domain }}">
+  <noscript><button>Search</button></noscript>
+</form>
+
+<nav class="chips" aria-label="Domains">
+  <a href="/?q={{ q|urlencode }}" class="chip {% if not domain %}on{% endif %}">All</a>
+  {% for key, label in DOMAINS.items() %}
+    <a href="/?domain={{ key }}&q={{ q|urlencode }}" class="chip {% if domain == key %}on{% endif %}">{{ label }}</a>
+  {% endfor %}
+</nav>
+
+<div id="results">{% include "_results.html" %}</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Tech-Amharic{% endblock %}</title>
+  <meta name="description" content="An open, reviewed termbase for computing and technology terms in Amharic.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+Ethiopic:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/site.css">
+  <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-row">
+      <a class="brand" href="/">Tech-Amharic</a>
+      <nav aria-label="Main">
+        <a href="/">Browse</a>
+        <a href="/review">Review queue</a>
+        <a href="/docs">API</a>
+        {% if user %}
+          <span class="who">{{ user.handle }} · {{ user.role.value }}</span>
+          <form method="post" action="/logout" class="inline"><button class="link">Sign out</button></form>
+        {% else %}
+          <a href="/login">Sign in</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="wrap site-footer">
+    Data CC BY-SA 4.0 · Code Apache 2.0 ·
+    <a href="/api/v1/export.tbx">TBX</a> ·
+    <a href="/api/v1/export.csv">CSV</a> ·
+    <a href="/api/v1/bundle.json">Bundle</a>
+  </footer>
+</body>
+</html>

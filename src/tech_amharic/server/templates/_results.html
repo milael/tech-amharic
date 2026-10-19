@@ -1,0 +1,21 @@
+{% if results %}
+<ul class="results">
+  {% for r in results %}
+  <li>
+    <a class="card" href="/c/{{ r.slug }}">
+      <span class="en">{{ r.en }}</span>
+      {% if r.am_preferred %}
+        <span class="am">{{ r.am_preferred }}</span>
+      {% elif r.am_candidates %}
+        <span class="am pending" title="Not yet reviewed">{{ r.am_candidates|join(" · ") }}</span>
+      {% else %}
+        <span class="am none">No Amharic term yet</span>
+      {% endif %}
+      <span class="domain">{{ DOMAINS.get(r.domain, r.domain) }}</span>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="empty">No matching concepts{% if q %} for “{{ q }}”{% endif %}.</p>
+{% endif %}

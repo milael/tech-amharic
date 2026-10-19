@@ -1,0 +1,11 @@
+Tech-Amharic
+
+Code (everything outside data/): Apache License, Version 2.0
+  https://www.apache.org/licenses/LICENSE-2.0
+
+Data (data/ and released datasets): Creative Commons Attribution-ShareAlike 4.0
+  https://creativecommons.org/licenses/by-sa/4.0/
+
+Before publishing, replace this file with the full Apache-2.0 text (GitHub's
+"Add file > Create new file > LICENSE > Choose a license template" inserts it)
+and add data/LICENSE with the CC BY-SA 4.0 legal code.

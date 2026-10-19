@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Review queue · Tech-Amharic{% endblock %}
+{% block content %}
+<h1>Review queue</h1>
+<p class="muted">Proposed terms, highest community score first. {% if not is_reviewer %}Reviewers record decisions on each concept's page.{% endif %}</p>
+
+<nav class="chips" aria-label="Domains">
+  <a href="/review" class="chip {% if not domain %}on{% endif %}">All</a>
+  {% for key, label in DOMAINS.items() %}
+    <a href="/review?domain={{ key }}" class="chip {% if domain == key %}on{% endif %}">{{ label }}</a>
+  {% endfor %}
+</nav>
+
+{% if queue %}
+<table class="terms">
+  <thead><tr><th>English</th><th>Proposed Amharic</th><th>Formation</th><th>Score</th><th>By</th></tr></thead>
+  <tbody>
+  {% for t in queue %}
+    {% set head = (t.concept.terms|selectattr("lang", "equalto", "en")|selectattr("status", "equalto", TermStatus.PREFERRED)|first) %}
+    <tr>
+      <td><a href="/c/{{ t.concept.slug }}">{{ head.text if head else t.concept.slug }}</a></td>
+      <td class="am-text" lang="am">{{ t.text }}</td>
+      <td>{{ t.formation.value if t.formation else "—" }}</td>
+      <td>{{ "%+d"|format(t.score) }}</td>
+      <td>{{ t.proposed_by.handle if t.proposed_by else "seed data" }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">Nothing waiting for review.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,10 @@
+.venv
+.venv-local
+.git
+dist
+*.db
+.env
+__pycache__
+.pytest_cache
+.ruff_cache
+.mypy_cache

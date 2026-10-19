@@ -1,0 +1,31 @@
+# Local stack: PostgreSQL + the app.
+#   docker compose up --build
+#   docker compose exec app tam admin import
+#   docker compose exec app tam admin create-user mili --role admin
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: tam
+      POSTGRES_PASSWORD: tam-local-only
+      POSTGRES_DB: tam
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tam -d tam"]
+      interval: 5s
+      retries: 10
+
+  app:
+    build: .
+    environment:
+      TAM_DATABASE_URL: postgresql+psycopg://tam:tam-local-only@db:5432/tam
+      TAM_SECURE_COOKIES: "false" # local http only; keep true in production
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
