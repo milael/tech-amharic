@@ -1,9 +1,12 @@
 name: Update uv.lock
 
-# Run from the Actions tab (or `gh workflow run lock.yml`) to regenerate the
-# lockfile and commit it when it changes.
+# Regenerates the lockfile and commits it when dependencies change.
+# Can also be run by hand from the Actions tab.
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [pyproject.toml, .github/workflows/lock.yml]
 
 permissions:
   contents: write
