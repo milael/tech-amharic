@@ -36,8 +36,16 @@ jobs:
         id: deploy
         run: |
           npx --yes wrangler@4 deploy 2>&1 | tee deploy.log
-          url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -n 1)
-          echo "::notice title=Chat worker URL::${url}"
+          url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -n 1 || true)
+          if [ -n "$url" ]; then
+            echo "::notice title=Chat worker URL::${url}"
+          else
+            echo "::warning title=Chat worker URL::No workers.dev URL in the deploy output. Register a workers.dev subdomain in the Cloudflare dashboard (Workers & Pages)."
+          fi
+          # Surface wrangler's key lines (no secrets are printed by wrangler).
+          grep -iE 'deployed|uploaded|subdomain|workers\.dev|warn|error|route' deploy.log | head -n 15 | while IFS= read -r line; do
+            echo "::notice title=wrangler::${line}"
+          done
       - name: Not deployed
         if: env.CLOUDFLARE_API_TOKEN == ''
         run: echo "::notice title=Chat worker::Skipped deploy; add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets to enable it."
