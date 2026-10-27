@@ -21,7 +21,7 @@ jobs:
       TAM_DATABASE_URL: postgresql+psycopg://tam:tam@localhost:5432/tam
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v7
       - run: uv sync --all-extras --locked
       - run: uv run alembic upgrade head
       # Git data is the reviewed source of record: build the release from it.
