@@ -1,5 +1,7 @@
 # Chat worker (Cloudflare Workers AI)
 
+Deployed automatically by `.github/workflows/worker.yml` on every change under `worker/`.
+
 The public demo's "Ask a question" panel posts to this Worker. For each
 question it:
 
