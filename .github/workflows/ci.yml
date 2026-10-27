@@ -12,20 +12,23 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
       # TODO: switch back to --locked once uv.lock is committed.
       - run: uv sync --all-extras
-      - name: Print resolved lockfile (to commit it)
-        run: cat uv.lock
       - name: Lint
         run: uv run ruff check . && uv run ruff format --check .
       - name: Validate termbase data
         run: uv run tam validate data/concepts
       - name: Tests (SQLite)
-        run: uv run pytest -ra
+        run: |
+          set -o pipefail
+          uv run pytest -ra | tee pytest.out
+      - name: Report test summary
+        if: always()
+        run: echo "::notice title=pytest::$(tail -n 1 pytest.out)"
 
   postgres:
     # Runs the real migrations against PostgreSQL and loads the seed data.
@@ -43,8 +46,8 @@ jobs:
     env:
       TAM_DATABASE_URL: postgresql+psycopg://tam:tam@localhost:5432/tam
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
       - run: uv sync --all-extras
