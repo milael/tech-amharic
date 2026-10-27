@@ -16,13 +16,16 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-      - run: uv sync --all-extras --locked
+      # TODO: switch back to --locked once uv.lock is committed.
+      - run: uv sync --all-extras
+      - name: Print resolved lockfile (to commit it)
+        run: cat uv.lock
       - name: Lint
         run: uv run ruff check . && uv run ruff format --check .
       - name: Validate termbase data
         run: uv run tam validate data/concepts
       - name: Tests (SQLite)
-        run: uv run pytest
+        run: uv run pytest -ra
 
   postgres:
     # Runs the real migrations against PostgreSQL and loads the seed data.
@@ -44,7 +47,7 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-      - run: uv sync --all-extras --locked
+      - run: uv sync --all-extras
       - run: uv run alembic upgrade head
       - run: uv run tam admin import data/concepts
       - run: uv run tam admin build --out dist/release --version ci
