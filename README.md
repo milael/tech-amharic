@@ -78,6 +78,20 @@ The container applies Alembic migrations on start. PostgreSQL adds a trigram ind
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and the reviewer [style guide](docs/STYLE_GUIDE.md).
 
+## Ask questions in Amharic (termbase-grounded chat)
+
+The chat finds the concepts a question mentions, puts their reviewed Amharic terms and definitions into the prompt, and asks a model to answer in Amharic using them (retrieval-augmented generation). Every answer lists the termbase entries it relied on.
+
+```bash
+ollama pull gemma4:e4b                      # free, local
+uv run tam ask "ምስጠራ እንዴት ይሰራል?"
+uv run tam ask "How does a firewall work?" --show-prompt   # inspect the prompt only
+```
+
+- **API:** `POST /api/v1/chat` in the FastAPI app (`TAM_LLM_BASE_URL`, `TAM_LLM_MODEL`, `TAM_LLM_API_KEY`; any OpenAI-compatible endpoint).
+- **Public demo:** a Cloudflare Worker running Gemma 4 26B on the Workers AI free tier. Setup: [worker/README.md](worker/README.md).
+- **Shared logic:** the prompt lives in `src/tech_amharic/chat_prompt.txt`; `tests/fixtures/retrieval_cases.json` keeps the Python and JavaScript retrieval identical.
+
 ## Evaluating a model
 
 ```bash

@@ -21,6 +21,17 @@ class Settings(BaseSettings):
     max_body_bytes: int = 64_000
     release_version: str = "0.1.0-dev"
 
+    # Chat (termbase-grounded answers). Any OpenAI-compatible endpoint works:
+    # Ollama locally (default), vLLM, or a hosted API.
+    chat_enabled: bool = True
+    llm_base_url: str = "http://localhost:11434/v1"
+    llm_model: str = "gemma4:e4b"
+    llm_api_key: str = "ollama"
+    # Proposed (unreviewed) terms help while the termbase is young; switch
+    # off once enough terms are reviewed.
+    chat_include_unreviewed: bool = True
+    chat_rate_per_minute: int = 10
+
 
 @lru_cache
 def get_settings() -> Settings:

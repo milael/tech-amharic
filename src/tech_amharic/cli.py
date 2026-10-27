@@ -228,6 +228,45 @@ def validate(
     typer.secho(f"{len(records)} records OK", fg="green")
 
 
+@app.command()
+def ask(
+    question: str,
+    data: DataDir = Path("data/concepts"),
+    include_unreviewed: Unreviewed = True,
+    model: Annotated[str, typer.Option(envvar="TAM_LLM_MODEL")] = "gemma4:e4b",
+    base_url: Annotated[
+        str, typer.Option(envvar="TAM_LLM_BASE_URL", help="OpenAI-compatible endpoint")
+    ] = "http://localhost:11434/v1",
+    api_key: Annotated[str, typer.Option(envvar="TAM_LLM_API_KEY")] = "ollama",
+    show_prompt: Annotated[
+        bool, typer.Option("--show-prompt", help="Print the prompt only.")
+    ] = False,
+) -> None:
+    """Ask a technology question; the answer comes in Amharic, grounded in the termbase."""
+    import asyncio
+
+    from . import chat
+
+    records = rec.select(
+        rec.read_dir(data or Path("data/concepts")), published_only=not include_unreviewed
+    )
+    if show_prompt:
+        found = chat.retrieve(records, question)
+        for m in chat.build_messages(question, found):
+            typer.secho(f"[{m['role']}]", bold=True)
+            typer.echo(m["content"] + "\n")
+        return
+    result = asyncio.run(
+        chat.ask(question, records, base_url=base_url, model=model, api_key=api_key)
+    )
+    typer.echo(result["answer"] + "\n")
+    used = set(result["checks"]["terms_used"])
+    for c in result["concepts"]:
+        mark = "used" if c["id"] in used else "not used"
+        typer.secho(f"  {c['en']} -> {c['am']} [{c['status']}, {mark}]", dim=True)
+    typer.secho(f"  Ge'ez script share: {result['checks']['ethiopic_ratio']:.0%}", dim=True)
+
+
 @app.command("eval")
 def evaluate_model(
     model: Annotated[str, typer.Option(help="Model name, e.g. gemma4:e4b")],

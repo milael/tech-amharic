@@ -4,6 +4,8 @@ import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -26,11 +28,13 @@ def test_site_build_writes_page_and_data(tmp_path: Path) -> None:
     ET.fromstring((out / "data" / "tech-amharic.tbx").read_bytes())
 
 
-def test_js_normalization_tables_match_python() -> None:
-    # app.js re-implements norm_key; its fold tables must not drift.
+@pytest.mark.parametrize("js_file", ["site/app.js", "worker/src/normalize.js"])
+def test_js_normalization_tables_match_python(js_file: str) -> None:
+    # The demo and the chat Worker re-implement norm_key; their fold tables
+    # must not drift from the Python source.
     from tech_amharic import normalize
 
-    js = (ROOT / "site" / "app.js").read_text(encoding="utf-8")
+    js = (ROOT / js_file).read_text(encoding="utf-8")
 
     def table(name: str) -> dict[int, int]:
         body = re.search(rf"const {name} = \{{([^}}]*)\}}", js)

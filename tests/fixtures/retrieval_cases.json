@@ -1,0 +1,845 @@
+{
+ "concepts": [
+  {
+   "definition_en": "Computer systems that perform tasks normally needing human intelligence.",
+   "domain": "ai-ml",
+   "id": "artificial-intelligence",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "artificial intelligence"
+    },
+    {
+     "formation": "abbreviation",
+     "lang": "en",
+     "status": "admitted",
+     "text": "AI"
+    },
+    {
+     "formation": "calque",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ሰው ሰራሽ አስተውሎት"
+    },
+    {
+     "formation": "loan",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "አርቴፊሻል ኢንተለጀንስ"
+    }
+   ]
+  },
+  {
+   "definition_en": "Fast, temporary storage a computer uses while running programs.",
+   "domain": "hardware",
+   "id": "computer-memory",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "memory"
+    },
+    {
+     "formation": "abbreviation",
+     "lang": "en",
+     "status": "admitted",
+     "text": "RAM"
+    },
+    {
+     "formation": "native",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ማህደረ ትውስታ"
+    }
+   ]
+  },
+  {
+   "definition_en": "A set of instructions a computer can execute.",
+   "domain": "software",
+   "id": "computer-program",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "program"
+    },
+    {
+     "formation": "loan",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ፕሮግራም"
+    }
+   ]
+  },
+  {
+   "definition_en": "Malware that spreads by attaching itself to other programs or files.",
+   "domain": "security",
+   "id": "computer-virus",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "virus"
+    },
+    {
+     "formation": "loan",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ቫይረስ"
+    }
+   ]
+  },
+  {
+   "definition_en": "Protecting systems, networks and data from digital attacks.",
+   "domain": "security",
+   "id": "cybersecurity",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "cybersecurity"
+    },
+    {
+     "formation": "calque",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "የሳይበር ደህንነት"
+    }
+   ]
+  },
+  {
+   "definition_en": "Recorded facts or values, such as numbers, text or measurements.",
+   "domain": "data",
+   "id": "data",
+   "note": "Distinct from መረጃ (information): data becomes information when interpreted.",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "data"
+    },
+    {
+     "formation": "native",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ውሂብ"
+    },
+    {
+     "formation": "loan",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ዳታ"
+    }
+   ]
+  },
+  {
+   "definition_en": "Transforming data so only holders of a key can read it.",
+   "domain": "security",
+   "id": "encryption",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "encryption"
+    },
+    {
+     "formation": "native",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ምስጠራ"
+    }
+   ]
+  },
+  {
+   "definition_en": "A system that filters network traffic according to security rules.",
+   "domain": "security",
+   "id": "firewall",
+   "note": "The literal calque may confuse readers; a deprecation candidate.",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "firewall"
+    },
+    {
+     "formation": "loan",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ፋየርዎል"
+    },
+    {
+     "formation": "calque",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "የእሳት ግድግዳ"
+    }
+   ]
+  },
+  {
+   "definition_en": "A processor built for parallel work such as graphics and AI training.",
+   "domain": "hardware",
+   "id": "gpu",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "graphics processing unit"
+    },
+    {
+     "formation": "abbreviation",
+     "lang": "en",
+     "status": "admitted",
+     "text": "GPU"
+    },
+    {
+     "formation": "calque",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "የግራፊክስ ማቀነባበሪያ ክፍል"
+    },
+    {
+     "formation": "abbreviation",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ጂፒዩ"
+    }
+   ]
+  },
+  {
+   "definition_en": "The physical parts of a computer system.",
+   "domain": "general",
+   "id": "hardware",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "hardware"
+    },
+    {
+     "formation": "loan",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ሃርድዌር"
+    }
+   ]
+  },
+  {
+   "definition_en": "The use of computers and networks to store, process and exchange information.",
+   "domain": "general",
+   "id": "information-technology",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "information technology"
+    },
+    {
+     "formation": "abbreviation",
+     "lang": "en",
+     "status": "admitted",
+     "text": "IT"
+    },
+    {
+     "formation": "calque",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "የመረጃ ቴክኖሎጂ"
+    }
+   ]
+  },
+  {
+   "definition_en": "A number that identifies a device on an IP network.",
+   "domain": "networking",
+   "id": "ip-address",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "IP address"
+    },
+    {
+     "formation": "calque",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "የአይፒ አድራሻ"
+    }
+   ]
+  },
+  {
+   "definition_en": "The core of an operating system that controls hardware and system resources.",
+   "domain": "software",
+   "id": "kernel-os",
+   "note": "One of three 'kernel' concepts; see kernel-convolution and kernel-method.",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "kernel"
+    },
+    {
+     "formation": "calque",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "የስርዓተ ክወና አስኳል"
+    },
+    {
+     "formation": "loan",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ከርነል"
+    }
+   ]
+  },
+  {
+   "definition_en": "A neural network trained on large amounts of text to understand and generate language.",
+   "domain": "ai-ml",
+   "id": "large-language-model",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "large language model"
+    },
+    {
+     "formation": "abbreviation",
+     "lang": "en",
+     "status": "admitted",
+     "text": "LLM"
+    },
+    {
+     "formation": "calque",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ትልቅ የቋንቋ ሞዴል"
+    }
+   ]
+  },
+  {
+   "definition_en": "A trained mathematical function that makes predictions from inputs.",
+   "domain": "ai-ml",
+   "id": "ml-model",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "model"
+    },
+    {
+     "formation": "loan",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ሞዴል"
+    }
+   ]
+  },
+  {
+   "definition_en": "Software that manages a computer's hardware and provides common services to applications.",
+   "domain": "general",
+   "id": "operating-system",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "operating system"
+    },
+    {
+     "formation": "abbreviation",
+     "lang": "en",
+     "status": "admitted",
+     "text": "OS"
+    },
+    {
+     "formation": "native",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ስርዓተ ክወና"
+    },
+    {
+     "formation": "loan",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ኦፐሬቲንግ ሲስተም"
+    }
+   ]
+  },
+  {
+   "definition_en": "Tricking people into revealing secrets or installing malware, usually through fake messages.",
+   "domain": "security",
+   "id": "phishing",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "phishing"
+    },
+    {
+     "formation": "extension",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ማስገር"
+    }
+   ]
+  },
+  {
+   "definition_en": "The input text or instruction given to a generative AI model.",
+   "domain": "ai-ml",
+   "id": "prompt-ai",
+   "note": "No settled term yet; the native option is a first suggestion.",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "prompt"
+    },
+    {
+     "formation": "loan",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ፕሮምፕት"
+    },
+    {
+     "formation": "native",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "መጠየቂያ"
+    }
+   ]
+  },
+  {
+   "definition_en": "Malware that encrypts a victim's data and demands payment to restore it.",
+   "domain": "security",
+   "id": "ransomware",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "ransomware"
+    },
+    {
+     "formation": "phrase",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ቤዛ ጠያቂ ሶፍትዌር"
+    },
+    {
+     "formation": "loan",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ራንሰምዌር"
+    }
+   ]
+  },
+  {
+   "definition_en": "A device that forwards data packets between networks.",
+   "domain": "networking",
+   "id": "router",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "router"
+    },
+    {
+     "formation": "loan",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ራውተር"
+    }
+   ]
+  },
+  {
+   "definition_en": "Manipulating people into breaking security practices.",
+   "domain": "security",
+   "id": "social-engineering",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "social engineering"
+    },
+    {
+     "formation": "calque",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ማህበራዊ ምህንድስና"
+    }
+   ]
+  },
+  {
+   "definition_en": "Programs and related data that tell a computer what to do.",
+   "domain": "general",
+   "id": "software",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "software"
+    },
+    {
+     "formation": "loan",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ሶፍትዌር"
+    }
+   ]
+  },
+  {
+   "definition_en": "A defect in software that makes it behave incorrectly.",
+   "domain": "software",
+   "id": "software-bug",
+   "note": "ስህተት also means any error; ሳንካ is narrower.",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "bug"
+    },
+    {
+     "formation": "extension",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ሳንካ"
+    },
+    {
+     "formation": "extension",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ስህተት"
+    }
+   ]
+  },
+  {
+   "definition_en": "A unit of text, often part of a word, that a language model processes.",
+   "domain": "ai-ml",
+   "id": "token-nlp",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "token"
+    },
+    {
+     "formation": "loan",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ቶክን"
+    }
+   ]
+  },
+  {
+   "definition_en": "A person who uses a computer system or service.",
+   "domain": "general",
+   "id": "user",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "user"
+    },
+    {
+     "formation": "extension",
+     "lang": "am",
+     "sources": [
+      {
+       "citation": "Initial seed draft (LLM-assisted); awaiting review by a native-speaking reviewer",
+       "kind": "draft"
+      }
+     ],
+     "status": "proposed",
+     "text": "ተጠቃሚ"
+    }
+   ]
+  }
+ ],
+ "cases": [
+  {
+   "question": "What is encryption?",
+   "expected": [
+    "encryption"
+   ]
+  },
+  {
+   "question": "ምስጠራ እንዴት ይሰራል?",
+   "expected": [
+    "encryption"
+   ]
+  },
+  {
+   "question": "የሳይበር ደህንነት ምንድን ነው?",
+   "expected": [
+    "cybersecurity"
+   ]
+  },
+  {
+   "question": "Explain the difference between a virus and ransomware",
+   "expected": [
+    "computer-virus",
+    "ransomware"
+   ]
+  },
+  {
+   "question": "How does an IP address work with a router?",
+   "expected": [
+    "ip-address",
+    "router"
+   ]
+  },
+  {
+   "question": "What is a large language model and what is a token?",
+   "expected": [
+    "large-language-model",
+    "ml-model",
+    "token-nlp"
+   ]
+  },
+  {
+   "question": "ፋየርዎልን አብራራልኝ",
+   "expected": [
+    "firewall"
+   ]
+  },
+  {
+   "question": "What is the weather like today?",
+   "expected": []
+  },
+  {
+   "question": "Is phishing a kind of social engineering?",
+   "expected": [
+    "phishing",
+    "social-engineering"
+   ]
+  },
+  {
+   "question": "What is it with kernels in operating systems?",
+   "expected": [
+    "kernel-os",
+    "operating-system"
+   ]
+  },
+  {
+   "question": "ሀርድዌር እና ሶፍትዌር ምን ልዩነት አላቸው?",
+   "expected": [
+    "hardware",
+    "software"
+   ]
+  },
+  {
+   "question": "What does IT mean?",
+   "expected": [
+    "information-technology"
+   ]
+  },
+  {
+   "question": "How do GPUs help AI?",
+   "expected": [
+    "artificial-intelligence",
+    "gpu"
+   ]
+  },
+  {
+   "question": "የምሥጠራ ጥቅም ምንድን ነው?",
+   "expected": [
+    "encryption"
+   ]
+  }
+ ]
+}

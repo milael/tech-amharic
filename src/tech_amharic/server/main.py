@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from ..domain import RuleViolation
-from . import api, web
+from . import api, chat_api, web
 from .config import Settings, get_settings
 from .db import Database, create_tables
 from .security import RateLimiter
@@ -50,6 +50,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
     app.state.db = db
     app.state.limiter = RateLimiter(settings.write_rate_per_minute)
+    app.state.chat_limiter = RateLimiter(settings.chat_rate_per_minute)
+    app.state.ask = chat_api.default_ask
 
     @app.exception_handler(RuleViolation)
     async def rule_violation(_: Request, exc: RuleViolation) -> JSONResponse:
@@ -77,6 +79,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return {"status": "ok"}
 
     app.include_router(api.router)
+    app.include_router(chat_api.router)
     app.include_router(web.router)
     app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
     return app

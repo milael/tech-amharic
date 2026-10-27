@@ -10,3 +10,5 @@ dist/
 .env
 eval-report*.json
 _site/
+worker/dist/
+worker/node_modules/

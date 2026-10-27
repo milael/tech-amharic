@@ -104,6 +104,46 @@ h1 { font-size: clamp(28px, 4.6vw, 44px); line-height: 1.12; letter-spacing: -0.
 .badge.proposed, .badge.changes_requested { color: var(--proposed); background: var(--proposed-tint); }
 .badge.deprecated, .badge.rejected { color: var(--deprecated); background: var(--deprecated-tint); }
 
+/* ask */
+.ask-hint { margin: 16px 0 0; color: var(--muted); font-size: 15px; }
+.ask { margin-top: 72px; }
+.ask-intro { color: var(--muted); max-width: 66ch; margin: 0 0 20px; }
+.chat-log { display: grid; gap: 16px; margin-bottom: 16px; }
+.chat-log:empty { display: none; }
+.msg { max-width: 760px; }
+.msg .who { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+.msg.user .body { font-weight: 500; }
+.msg.bot .body { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 18px 20px; }
+.msg.bot .answer { font-family: var(--am); font-size: 19px; line-height: 1.75; }
+.msg.bot .answer p { margin: 0 0 10px; }
+.msg.bot .answer p:last-child { margin-bottom: 0; }
+.msg.bot .answer ul { margin: 0 0 10px; padding-left: 22px; }
+.msg.error .body { border-left: 3px solid var(--deprecated); background: var(--deprecated-tint); padding: 10px 14px; border-radius: 0; }
+.msg.pending .body { color: var(--muted); }
+.sources { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--rule); font-size: 14px; color: var(--muted); }
+.sources a { display: inline-flex; gap: 6px; align-items: baseline; margin: 6px 8px 0 0; padding: 3px 10px; border: 1px solid var(--rule); border-radius: 999px; text-decoration: none; color: var(--ink); }
+.sources a [lang="am"] { font-size: 15px; }
+.sources a.unused { opacity: .65; }
+.ask-form label { display: block; font-weight: 600; margin-bottom: 8px; }
+.ask-row { display: flex; gap: 8px; align-items: stretch; }
+.ask-row textarea {
+  flex: 1; font: 400 18px/1.4 var(--ui); padding: 12px 14px; resize: vertical; min-height: 56px;
+  color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 10px;
+}
+.ask-row button {
+  font: 600 16px var(--ui); padding: 0 22px; border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--preferred); background: var(--preferred); color: var(--paper);
+}
+.ask-row button[disabled] { opacity: .6; cursor: progress; }
+.suggestions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.suggestions button {
+  font: 400 14px var(--ui); padding: 6px 12px; border-radius: 999px; cursor: pointer;
+  border: 1px dashed var(--rule); background: transparent; color: var(--muted); text-align: left;
+}
+.suggestions button[lang="am"] { font-family: var(--am); font-size: 15px; }
+.suggestions button:hover { color: var(--ink); border-style: solid; }
+.fineprint { color: var(--muted); font-size: 13px; max-width: 70ch; margin-top: 16px; }
+
 /* sections */
 .how, .data { margin-top: 72px; }
 h2 { font-size: 26px; letter-spacing: -0.01em; margin: 0 0 16px; }
@@ -126,4 +166,6 @@ code { font-size: 0.92em; }
   .detail { position: static; padding: 20px; }
   nav a { margin-left: 0; margin-right: 16px; }
   .hero { padding-top: 32px; }
+  .ask-row { flex-direction: column; }
+  .ask-row button { padding: 12px; }
 }

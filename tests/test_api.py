@@ -283,3 +283,65 @@ def test_web_login_and_cross_site_post_blocked(ctx: Ctx) -> None:
         "/c/encryption/propose", data={"text": "ሀ"}, headers={"Origin": "https://evil.example"}
     )
     assert evil.status_code == 403
+
+
+# ---------------------------------------------------------------- chat
+
+
+def test_chat_grounds_answer_in_termbase(ctx: Ctx) -> None:
+    calls: list[dict[str, object]] = []
+
+    async def fake_ask(question, records, **kw):  # type: ignore[no-untyped-def]
+        from tech_amharic import chat
+
+        found = chat.retrieve(records, question)
+        calls.append({"question": question, "found": [c["id"] for c in found], **kw})
+        answer = "ምስጠራ (encryption) መረጃን ይጠብቃል።"
+        return {
+            "answer": answer,
+            "concepts": [chat.concept_summary(c) for c in found],
+            "checks": chat.check_answer(answer, found).__dict__,
+            "model": kw["model"],
+        }
+
+    ctx.client.app.state.ask = fake_ask  # type: ignore[attr-defined]
+    r = ctx.client.post("/api/v1/chat", json={"question": "ምስጠራ ምንድን ነው?"})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["concepts"][0]["id"] == "encryption"
+    assert body["checks"]["terms_used"] == ["encryption"]
+    assert calls[0]["found"] == ["encryption"]
+
+
+def test_chat_validates_and_rate_limits(ctx: Ctx) -> None:
+    async def fake_ask(question, records, **kw):  # type: ignore[no-untyped-def]
+        return {
+            "answer": "ሀ",
+            "concepts": [],
+            "checks": {"ethiopic_ratio": 1.0, "terms_used": [], "terms_missing": []},
+            "model": "m",
+        }
+
+    app = ctx.client.app  # type: ignore[attr-defined]
+    app.state.ask = fake_ask
+    assert ctx.client.post("/api/v1/chat", json={"question": ""}).status_code == 422
+    too_long = "ሀ" * 501
+    assert ctx.client.post("/api/v1/chat", json={"question": too_long}).status_code == 422
+    from tech_amharic.server.security import RateLimiter
+
+    app.state.chat_limiter = RateLimiter(2)
+    codes = [
+        ctx.client.post("/api/v1/chat", json={"question": "ምንድን ነው?"}).status_code for _ in range(3)
+    ]
+    assert codes == [200, 200, 429]
+
+
+def test_chat_reports_model_outage(ctx: Ctx) -> None:
+    import httpx
+
+    async def broken(question, records, **kw):  # type: ignore[no-untyped-def]
+        raise httpx.ConnectError("down")
+
+    ctx.client.app.state.ask = broken  # type: ignore[attr-defined]
+    r = ctx.client.post("/api/v1/chat", json={"question": "What is a firewall?"})
+    assert r.status_code == 502

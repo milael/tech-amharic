@@ -1,0 +1,23 @@
+name = "tech-amharic-chat"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[ai]
+binding = "AI"
+
+[vars]
+MODEL = "@cf/google/gemma-4-26b-a4b-it"
+BUNDLE_URL = "https://milael.github.io/tech-amharic/data/bundle.json"
+ALLOWED_ORIGINS = "https://milael.github.io,http://localhost:8000,http://127.0.0.1:8000"
+# Use proposed (unreviewed) terms too while the termbase is young.
+INCLUDE_UNREVIEWED = "true"
+
+# Per-visitor limit: 6 questions a minute (approximate, per Cloudflare location).
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 6
+  period = 60
