@@ -25,7 +25,7 @@ configs:
 
 # Tech-Amharic
 
-Human-reviewed English–Amharic terminology for computing and technology, exported from the [Tech-Amharic termbase](https://github.com/<your-github-user>/tech-amharic).
+Human-reviewed English–Amharic terminology for computing and technology, exported from the [Tech-Amharic termbase](https://github.com/milael/tech-amharic).
 
 ## Configs
 
@@ -52,6 +52,6 @@ Every Amharic term in this dataset was approved by a reviewer in the Tech-Amhari
   title  = {Tech-Amharic: an open, reviewed termbase for computing terms in Amharic},
   author = {Deneke, Milael Mekonnen and contributors},
   year   = {2026},
-  url    = {https://github.com/<your-github-user>/tech-amharic}
+  url    = {https://github.com/milael/tech-amharic}
 }
 ```

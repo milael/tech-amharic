@@ -42,7 +42,7 @@ dataset = ["pyarrow>=20"]
 tam = "tech_amharic.cli:app"
 
 [project.urls]
-Repository = "https://github.com/<your-github-user>/tech-amharic"
+Repository = "https://github.com/milael/tech-amharic"
 
 [dependency-groups]
 dev = [

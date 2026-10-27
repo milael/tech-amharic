@@ -35,5 +35,5 @@ jobs:
             dist/release/bundle.json dist/release/tech-amharic.tbx dist/release/tech-amharic.csv \
             dist/release/dataset/*
       # Uncomment once the Hugging Face dataset repo and HF_TOKEN secret exist:
-      # - run: uvx --from huggingface_hub hf upload <your-hf-user>/tech-amharic dist/release/dataset . --repo-type dataset
+      # - run: uvx --from huggingface_hub hf upload milael/tech-amharic dist/release/dataset . --repo-type dataset
       #   env: { HF_TOKEN: "${{ secrets.HF_TOKEN }}" }

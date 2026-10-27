@@ -29,7 +29,7 @@ app.add_typer(admin, name="admin")
 
 DEFAULT_BUNDLE_URL = os.environ.get(
     "TAM_BUNDLE_URL",
-    "https://github.com/<your-github-user>/tech-amharic/releases/latest/download/bundle.json",
+    "https://github.com/milael/tech-amharic/releases/latest/download/bundle.json",
 )
 DEFAULT_API = os.environ.get("TAM_API_URL", "http://127.0.0.1:8000")
 
