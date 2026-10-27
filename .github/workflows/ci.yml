@@ -16,8 +16,7 @@ jobs:
       - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-      # TODO: switch back to --locked once uv.lock is committed.
-      - run: uv sync --all-extras
+      - run: uv sync --all-extras --locked
       - name: Lint
         run: uv run ruff check . && uv run ruff format --check .
       - name: Validate termbase data
@@ -50,7 +49,7 @@ jobs:
       - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-      - run: uv sync --all-extras
+      - run: uv sync --all-extras --locked
       - run: uv run alembic upgrade head
       - run: uv run tam admin import data/concepts
       - run: uv run tam admin build --out dist/release --version ci
