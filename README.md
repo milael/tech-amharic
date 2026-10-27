@@ -4,6 +4,8 @@ An open, reviewed, concept-oriented termbase for computing and technology terms 
 
 > **Status: v0.1, pre-review.** The 121 seed concepts in `data/concepts/` carry *proposed* Amharic terms only. They are a starting draft for human reviewers, not a recommendation. Nothing is published until a reviewer approves it.
 
+**Live demo:** https://milael.github.io/tech-amharic/ (search and browse the termbase in the browser; rebuilt from `data/concepts/` on every push).
+
 ## Why
 
 Older Amharic ICT glossaries cover the Office era (save, file, menu). Engineers and students today meet vector embeddings, zero trust, containers and prompt injection with no reviewed Amharic. Open language models also read Amharic far better than they write it. A small, carefully reviewed termbase helps both people and models.
@@ -47,6 +49,15 @@ uv run tam admin serve --reload                    # http://127.0.0.1:8000
 ```
 
 Sign in at `/login` with a token. API docs are at `/docs`.
+
+### Build the static demo
+
+```bash
+uv run python scripts/build_site.py --out _site
+python -m http.server -d _site 8000                 # http://127.0.0.1:8000
+```
+
+The `pages.yml` workflow publishes the same build to GitHub Pages.
 
 ### Run with PostgreSQL (Docker)
 

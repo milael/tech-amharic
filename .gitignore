@@ -9,3 +9,4 @@ dist/
 *.db
 .env
 eval-report*.json
+_site/
