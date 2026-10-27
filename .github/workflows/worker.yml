@@ -50,3 +50,26 @@ jobs:
       - name: Not deployed
         if: env.CLOUDFLARE_API_TOKEN == ''
         run: echo "::notice title=Chat worker::Skipped deploy; add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets to enable it."
+      - name: Smoke test the live chat
+        if: steps.deploy.outcome == 'success'
+        run: |
+          url=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -n 1)
+          esc() { python3 -c 'import sys; s=sys.stdin.read(); print(s.replace("%","%25").replace("\r","%0D").replace("\n","%0A"), end="")'; }
+          fail=0
+          for q in "ምስጠራ እንዴት ይሰራል?" "What is the difference between a virus and ransomware?" "What is the weather today?"; do
+            body=$(jq -n --arg q "$q" '{question: $q}')
+            out=$(curl -sS -m 90 -w '\n%{http_code}' -X POST "$url/chat" \
+              -H "Origin: https://milael.github.io" -H "Content-Type: application/json" -d "$body")
+            code=$(echo "$out" | tail -n 1); json=$(echo "$out" | sed '$d')
+            if [ "$code" = "200" ]; then
+              summary=$(echo "$json" | jq -r --arg q "$q" '"Q: \($q)\nA: \(.answer)\n\nSources: \([.concepts[] | .en + " = " + (.am // "-")] | join(", "))\nTerms used: \(.checks.terms_used | join(", "))\nGeez share: \(.checks.ethiopic_ratio)"')
+              echo "::notice title=Chat answer (HTTP 200)::$(printf '%s' "$summary" | esc)"
+            else
+              echo "::error title=Chat failed (HTTP $code)::$(printf 'Q: %s\n%s' "$q" "$json" | esc)"
+              fail=1
+            fi
+          done
+          # Wrong origins must be refused.
+          bad=$(curl -sS -o /dev/null -w '%{http_code}' -X POST "$url/chat" -H "Origin: https://evil.example" -H "Content-Type: application/json" -d '{"question":"hi"}')
+          [ "$bad" = "403" ] || { echo "::error title=Origin check::expected 403, got $bad"; fail=1; }
+          exit $fail
