@@ -12,6 +12,8 @@ BUNDLE_URL = "https://milael.github.io/tech-amharic/data/bundle.json"
 ALLOWED_ORIGINS = "https://milael.github.io,http://localhost:8000,http://127.0.0.1:8000"
 # Use proposed (unreviewed) terms too while the termbase is young.
 INCLUDE_UNREVIEWED = "true"
+# Gemma 4 thinks before answering; leave room for reasoning plus the answer.
+MAX_TOKENS = "2048"
 
 # Per-visitor limit: 6 questions a minute (approximate, per Cloudflare location).
 [[ratelimits]]

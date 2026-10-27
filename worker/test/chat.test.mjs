@@ -113,3 +113,17 @@ test("preflight and health", async () => {
   const health = await h.fetch(new Request("https://worker.test/health"), makeEnv().env);
   assert.equal((await health.json()).ok, true);
 });
+
+test("joins content parts and explains empty answers", async () => {
+  resetBundleCache();
+  const parts = makeEnv({ aiResult: { choices: [{ message: { content: [{ type: "text", text: "ሀ" }, { type: "text", text: "ለ" }] } }] } });
+  const ok = await createHandler(PROMPT, fakeFetch).fetch(post({ question: "What is AI?" }), parts.env);
+  assert.equal((await ok.json()).answer, "ሀለ");
+  const empty = makeEnv({ aiResult: { choices: [{ finish_reason: "length", message: { content: null, reasoning_content: "long hidden plan" } }] } });
+  const res = await createHandler(PROMPT, fakeFetch).fetch(post({ question: "What is AI?" }), empty.env);
+  const body = await res.json();
+  assert.equal(res.status, 502);
+  assert.equal(body.shape.finish_reason, "length");
+  assert.equal(body.shape.reasoning_chars, 16);
+  assert.ok(!JSON.stringify(body).includes("long hidden plan"));
+});

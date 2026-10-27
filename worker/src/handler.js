@@ -58,10 +58,31 @@ async function loadConcepts(env, fetchImpl) {
   return concepts;
 }
 
+function partsText(content) {
+  // Some models return content as [{type: "text", text: "..."}, ...].
+  if (Array.isArray(content)) return content.map((p) => (typeof p === "string" ? p : p?.text ?? "")).join("");
+  return typeof content === "string" ? content : "";
+}
+
 function modelText(out) {
   if (typeof out === "string") return out;
   if (typeof out?.response === "string") return out.response;
-  return out?.choices?.[0]?.message?.content ?? "";
+  return partsText(out?.choices?.[0]?.message?.content);
+}
+
+// Field names, sizes and finish reason only (never content), to diagnose an
+// empty answer without exposing the model's reasoning.
+function outputShape(out) {
+  const choice = out?.choices?.[0];
+  const message = choice?.message || {};
+  return {
+    keys: out && typeof out === "object" ? Object.keys(out) : typeof out,
+    message_keys: Object.keys(message),
+    finish_reason: choice?.finish_reason ?? out?.finish_reason ?? null,
+    content_chars: partsText(message.content).length,
+    reasoning_chars: String(message.reasoning_content ?? message.reasoning ?? "").length,
+    usage: out?.usage ?? null,
+  };
 }
 
 const isQuotaError = (err) => /4006|neuron|daily|allocation|quota/i.test(String(err?.message || err));
@@ -116,9 +137,12 @@ export function createHandler(SYSTEM_PROMPT, fetchImpl = fetch) {
     const messages = buildMessages(SYSTEM_PROMPT, question, found, history);
     const model = env.MODEL || DEFAULT_MODEL;
     let answer;
+    let shape;
     try {
-      const out = await env.AI.run(model, { messages, max_tokens: 700, temperature: 0.3 });
+      const maxTokens = Number(env.MAX_TOKENS || 2048);
+      const out = await env.AI.run(model, { messages, max_tokens: maxTokens, temperature: 0.3 });
       answer = cleanAnswer(modelText(out));
+      if (!answer) shape = outputShape(out);
     } catch (err) {
       if (isQuotaError(err)) {
         return json(
@@ -130,7 +154,10 @@ export function createHandler(SYSTEM_PROMPT, fetchImpl = fetch) {
       console.error("model call failed", String(err));
       return json({ error: "model_error", detail: "The language model did not answer. Try again shortly." }, 502, headers);
     }
-    if (!answer) return json({ error: "empty_answer", detail: "The model returned no answer. Try rephrasing." }, 502, headers);
+    if (!answer) {
+      console.error("empty answer", JSON.stringify(shape));
+      return json({ error: "empty_answer", detail: "The model returned no answer. Try rephrasing.", shape }, 502, headers);
+    }
 
     return json(
       { answer, concepts: found.map(conceptSummary), checks: checkAnswer(answer, found), model },
