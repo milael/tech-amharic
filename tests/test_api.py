@@ -212,19 +212,19 @@ def test_duplicate_and_wrong_script_rejected(ctx: Ctx) -> None:
 
 def test_create_concept(ctx: Ctx) -> None:
     body = {
-        "slug": "retrieval-augmented-generation",
+        "slug": "quuxtron-grounding",  # made up, so it never exists in data/
         "domain": "ai-ml",
-        "definition_en": "Answering with a language model grounded in retrieved documents.",
+        "definition_en": "A made-up concept for this test.",
         "terms": [
-            {"lang": "en", "text": "retrieval-augmented generation"},
-            {"lang": "en", "text": "RAG", "formation": "abbreviation"},
+            {"lang": "en", "text": "quuxtron grounding"},
+            {"lang": "en", "text": "QXG", "formation": "abbreviation"},
             {"lang": "am", "text": "ሰነድ-ተኮር ምላሽ ማመንጨት", "formation": "phrase"},
         ],
     }
     r = ctx.client.post("/api/v1/concepts", json=body, headers=ctx.auth("ana"))
     assert r.status_code == 201, r.text
     statuses = [(t["text"], t["status"]) for t in r.json()["terms"]]
-    assert statuses[0] == ("retrieval-augmented generation", "preferred")
+    assert statuses[0] == ("quuxtron grounding", "preferred")
     assert all(s == "proposed" for _, s in statuses[1:])
     again = ctx.client.post("/api/v1/concepts", json=body, headers=ctx.auth("ana"))
     assert again.status_code == 409
