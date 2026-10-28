@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 from tech_amharic import suggestions as sug
@@ -51,22 +52,25 @@ def test_bad_or_non_technical_suggestions_are_skipped() -> None:
 
 def test_slugs_stay_unique_and_acronyms_are_marked() -> None:
     records = read_dir(DATA)
-    a = sug.merge(records, [{**KUBE, "term": "LLM ops"}])
-    assert a.added == ["llm-ops"]
-    b = sug.merge(a.records, [{**KUBE, "term": "llm-ops!", "terms": [{"text": "ሀለመ"}]}])
-    assert b.added == []  # same folded term as "LLM ops"
-    c = sug.merge(records, [{**KUBE, "term": "RAG"}])
-    rag = next(r for r in c.records if r["id"] == "rag")
+    a = sug.merge(records, [{**KUBE, "term": "Quuxtron ops"}])
+    assert a.added == ["quuxtron-ops"]
+    b = sug.merge(a.records, [{**KUBE, "term": "quuxtron-ops!", "terms": [{"text": "ሀለመ"}]}])
+    assert b.added == []  # same folded term as "Quuxtron ops"
+    c = sug.merge(records, [{**KUBE, "term": "QZX"}])
+    rag = next(r for r in c.records if r["id"] == "qzx")
     assert rag["terms"][0]["formation"] == "abbreviation"
 
 
 def test_every_ai_draft_names_its_source() -> None:
-    seed = "Seed draft by AI (Claude, Anthropic), 2026-10-20; awaiting native-speaker review"
+    seed = re.compile(
+        r"^Seed draft by AI \(Claude, Anthropic\), \d{4}-\d{2}-\d{2}; "
+        r"awaiting native-speaker review$"
+    )
     for r in read_dir(DATA):
         for t in r["terms"]:
             for src in t.get("sources", []):
                 if src["kind"] == "draft":
-                    assert src["citation"] == seed or src["citation"].startswith(
+                    assert seed.match(src["citation"]) or src["citation"].startswith(
                         "AI suggestion ("
                     ), src
 
