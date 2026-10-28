@@ -98,7 +98,9 @@ jobs:
           # AI suggestion round trip (generated or cached).
           sug=$(curl -sS -m 120 -X POST "$url/suggest" -H "Origin: https://milael.github.io" -H "Content-Type: application/json" -d '{"term":"kubernetes"}' || true)
           status=$(echo "$sug" | jq -r '.status // .error // "no-response"')
-          if [ "$status" = "generated" ] || [ "$status" = "cached" ]; then
+          if [ "$status" = "exists" ]; then
+            echo "::notice title=Suggestion (exists)::kubernetes is already in the glossary; suggestion lookup works"
+          elif [ "$status" = "generated" ] || [ "$status" = "cached" ]; then
             echo "::notice title=Suggestion ($status)::$(echo "$sug" | jq -c '{term: .suggestion.term, domain: .suggestion.domain, terms: .suggestion.terms, definition_am: .suggestion.definition_am}' | esc)"
           else
             echo "::error title=Suggestion failed::$(printf '%s' "$sug" | esc)"; fail=1
