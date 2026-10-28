@@ -12,7 +12,7 @@ from __future__ import annotations
 import re
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 from .domain import DOMAINS, Formation, Lang, SourceKind, TermStatus
 from .normalize import clean, norm_key
@@ -103,4 +103,64 @@ def merge(records: Sequence[ConceptRecord], suggestions: Iterable[dict[str, Any]
         taken.add(record["id"])
         known.update(norm_key(t["text"]) for t in record["terms"])
         result.added.append(record["id"])
+    return result
+
+
+# ---------------------------------------------------------------- visitor proposals
+
+
+def proposal_citation(proposal: dict[str, Any]) -> str:
+    who = clean(str(proposal.get("name") or "")) or "an anonymous visitor"
+    day = str(proposal.get("created_at") or "")[:10] or "unknown date"
+    count = int(proposal.get("count") or 1)
+    times = f"; submitted {count} times" if count > 1 else ""
+    return f"Proposed on the demo by {who} (unverified), {day}{times}; awaiting review"
+
+
+def merge_proposals(
+    records: Sequence[ConceptRecord], proposals: Iterable[dict[str, Any]]
+) -> MergeResult:
+    """Add visitor proposals as *proposed* Amharic terms on their concepts. Idempotent.
+
+    A proposal names a concept id, or the English term of an AI suggestion
+    (which ``merge`` has turned into a concept by then).
+    """
+    out = [cast(ConceptRecord, dict(r)) for r in records]
+    by_id = {r["id"]: r for r in out}
+    by_term = {
+        norm_key(t["text"]): r for r in out for t in r["terms"] if t["lang"] == Lang.EN.value
+    }
+    result = MergeResult(records=out)
+    for p in proposals:
+        text = clean(str(p.get("text", "")))
+        if not text:
+            continue
+        concept = by_id.get(str(p.get("concept_id") or "")) or by_term.get(
+            norm_key(str(p.get("term") or "-"))
+        )
+        label = f"{text} → {p.get('concept_id') or p.get('term')}"
+        if concept is None:
+            result.skipped.append(f"{label}: concept not found")
+            continue
+        if any(norm_key(t["text"]) == norm_key(text) for t in concept["terms"]):
+            result.skipped.append(f"{label}: already listed")
+            continue
+        term: TermRecord = {
+            "lang": Lang.AM.value,
+            "text": text,
+            "status": TermStatus.PROPOSED.value,
+            "sources": [{"kind": SourceKind.COINED.value, "citation": proposal_citation(p)}],
+        }
+        if p.get("formation") in set(Formation):
+            term["formation"] = p["formation"]
+        if p.get("note"):
+            term["note"] = f"Visitor note: {clean(str(p['note']))[:280]}"
+        new_terms = [*concept["terms"], term]
+        candidate: dict[str, Any] = {**concept, "terms": new_terms}
+        problems = validate(candidate)
+        if problems:
+            result.skipped.append(f"{label}: {'; '.join(problems)}")
+            continue
+        concept["terms"] = new_terms
+        result.added.append(label)
     return result

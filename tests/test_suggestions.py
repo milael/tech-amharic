@@ -69,3 +69,52 @@ def test_every_ai_draft_names_its_source() -> None:
                     assert src["citation"] == seed or src["citation"].startswith(
                         "AI suggestion ("
                     ), src
+
+
+def test_visitor_proposal_is_added_as_proposed_with_human_source() -> None:
+    records = read_dir(DATA)
+    fw = next(r for r in records if r["id"] == "firewall")
+    before = len(fw["terms"])
+    proposal = {
+        "concept_id": "firewall",
+        "text": "የአውታረ መረብ  ዘብ",
+        "formation": "calque",
+        "note": "used in a bank",
+        "name": "Abebe",
+        "count": 3,
+        "created_at": "2026-10-28T02:00:00Z",
+    }
+    result = sug.merge_proposals(records, [proposal])
+    assert result.added == ["የአውታረ መረብ ዘብ → firewall"]
+    new = next(r for r in result.records if r["id"] == "firewall")
+    term = new["terms"][-1]
+    assert len(new["terms"]) == before + 1
+    assert term["status"] == "proposed" and term["formation"] == "calque"
+    assert term["sources"][0]["kind"] == "coined"
+    assert term["sources"][0]["citation"] == (
+        "Proposed on the demo by Abebe (unverified), 2026-10-28; submitted 3 times; awaiting review"
+    )
+    assert term["note"] == "Visitor note: used in a bank"
+    assert len(fw["terms"]) == before  # input records untouched
+    # Idempotent: importing again changes nothing.
+    again = sug.merge_proposals(result.records, [proposal])
+    assert again.added == [] and "already listed" in again.skipped[0]
+
+
+def test_proposal_for_an_ai_suggestion_and_unknown_targets() -> None:
+    merged = sug.merge(read_dir(DATA), [KUBE])
+    result = sug.merge_proposals(
+        merged.records,
+        [
+            {"term": "exampletron", "text": "የኮንቴይነር አስተዳዳሪ", "created_at": "2026-10-28"},
+            {"concept_id": "no-such-concept", "text": "ምስጠራ"},
+        ],
+    )
+    assert result.added == ["የኮንቴይነር አስተዳዳሪ → exampletron"]
+    assert (
+        "anonymous visitor"
+        in next(r for r in result.records if r["id"] == "exampletron")["terms"][-1]["sources"][0][
+            "citation"
+        ]
+    )
+    assert result.skipped == ["ምስጠራ → no-such-concept: concept not found"]

@@ -12,6 +12,8 @@ question it:
 
 It also serves AI term suggestions: `POST /suggest {"term": "..."}` returns an existing concept, a stored suggestion, or a new one from Gemma 4 (approved glossary terms are given as examples), saved in the `SUGGESTIONS` KV namespace. `GET /suggestions` lists them for `tam admin pull-suggestions`. The deploy workflow creates the KV namespace on first deploy.
 
+Visitors can also send their own Amharic alternatives: `POST /propose {"concept_id": "load-balancer", "text": "ጭነት አመጣጣኝ", "formation"?, "note"?, "name"?}` (or `"term"` instead of `concept_id` for an AI suggestion not imported yet). The Worker checks the term is in Ge'ez script, not already listed, and not over 20 pending proposals per concept; a repeat of the same term increases its `count`. `GET /proposals?concept=<id>` lists pending terms (text and count only) for the demo card; `GET /suggestions` includes all proposals for import.
+
 No API key reaches the browser. On the Workers Free plan the model allowance
 is 10,000 neurons a day (very roughly 200 answers); after that Workers AI
 refuses requests until midnight UTC, there are no charges, and the page shows

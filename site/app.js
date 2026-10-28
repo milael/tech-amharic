@@ -133,8 +133,9 @@ function renderDetail(c) {
     .map((t) => {
       const src = (t.sources || []).map((s) => esc(s.citation)).join("; ");
       const ai = (t.sources || []).some((s) => AI_SOURCE.test(s.citation || ""));
+      const visitor = (t.sources || []).some((s) => VISITOR_SOURCE.test(s.citation || ""));
       return `<tr><td lang="am">${esc(t.text)}${src ? `<div class="src">${src}</div>` : ""}</td>
-        <td><span class="badge ${esc(t.status)}">${esc(STATUS_LABEL[t.status] || t.status)}</span>${ai ? ' <span class="badge ai">AI draft</span>' : ""}</td>
+        <td><span class="badge ${esc(t.status)}">${esc(STATUS_LABEL[t.status] || t.status)}</span>${ai ? ' <span class="badge ai">AI draft</span>' : ""}${visitor ? ' <span class="badge ai">Visitor</span>' : ""}</td>
         <td>${esc(FORMATION_LABEL[t.formation] || "Not recorded")}</td></tr>`;
     })
     .join("");
@@ -147,7 +148,9 @@ function renderDetail(c) {
     ${c.definition_en ? `<p class="def">${esc(c.definition_en)}</p>` : ""}
     ${c.definition_am ? `<p class="def" lang="am">${esc(c.definition_am)}</p>` : ""}
     ${c.note ? `<p class="note">${esc(c.note)}</p>` : ""}
-    ${am.length ? `<table class="terms"><thead><tr><th>Amharic</th><th>Status</th><th>How it was formed</th></tr></thead><tbody>${rows}</tbody></table>` : ""}`;
+    ${am.length ? `<table class="terms"><thead><tr><th>Amharic</th><th>Status</th><th>How it was formed</th></tr></thead><tbody>${rows}</tbody></table>` : ""}
+    ${proposeBlock({ concept_id: c.id })}`;
+  loadPending(c.id);
 }
 
 function update({ keepSelection = false } = {}) {
@@ -222,9 +225,102 @@ async function boot() {
 }
 
 // ---- ask (chat) ---------------------------------------------------------------
-const chatState = { endpoint: "", suggestEndpoint: "", history: [], busy: false };
+const chatState = { endpoint: "", suggestEndpoint: "", proposeEndpoint: "", history: [], busy: false };
 const SUGGESTABLE = /^[A-Za-z][A-Za-z0-9 .+#/&'-]{1,59}$/;
 const AI_SOURCE = /^(Seed draft by AI|AI suggestion)/;
+const VISITOR_SOURCE = /^Proposed on the demo by/;
+
+// ---- visitor proposals ("Suggest a better term") ---------------------------------
+const pendingCache = new Map(); // concept id -> proposals awaiting review
+
+function proposeBlock(target) {
+  if (!chatState.proposeEndpoint) return "";
+  const attrs = target.concept_id ? `data-concept="${esc(target.concept_id)}"` : `data-term="${esc(target.term)}"`;
+  const options = Object.entries(FORMATION_LABEL)
+    .map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`)
+    .join("");
+  return `<details class="propose">
+    <summary>Suggest a better term</summary>
+    <div class="pending-props" id="pending-props"></div>
+    <form class="propose-form" ${attrs} novalidate>
+      <label><span>Amharic term</span><input name="text" lang="am" required maxlength="60" autocomplete="off" placeholder="በፊደል ይጻፉ"></label>
+      <label><span>How it is formed <span class="opt">(optional)</span></span>
+        <select name="formation"><option value="">Not sure</option>${options}</select></label>
+      <label><span>Why it is better, or where it is used <span class="opt">(optional)</span></span>
+        <textarea name="note" rows="2" maxlength="280"></textarea></label>
+      <label><span>Your name <span class="opt">(optional)</span></span><input name="name" maxlength="40" autocomplete="name"></label>
+      <p class="fine">Your term, note and name become public in the project's GitHub repository. A reviewer decides whether it is used.</p>
+      <button type="submit">Send suggestion</button>
+      <p class="propose-status" role="status"></p>
+    </form>
+  </details>`;
+}
+
+function renderPending(list) {
+  const el = $("pending-props");
+  if (!el) return;
+  el.innerHTML = list.length
+    ? `<p class="fine">Waiting for review: ${list
+        .map((p) => `<span lang="am">${esc(p.text)}</span>${p.count > 1 ? ` (${p.count}×)` : ""}`)
+        .join(", ")}</p>`
+    : "";
+}
+
+async function loadPending(id) {
+  if (!chatState.proposeEndpoint) return;
+  if (pendingCache.has(id)) return renderPending(pendingCache.get(id));
+  try {
+    const url = new URL(chatState.proposeEndpoint.replace(/\/propose$/, "/proposals"));
+    url.searchParams.set("concept", id);
+    const data = await (await fetch(url)).json();
+    pendingCache.set(id, data.proposals || []);
+    if (state.selected === id) renderPending(pendingCache.get(id));
+  } catch {
+    /* the list is a nicety; the form still works */
+  }
+}
+
+async function sendProposal(form) {
+  const status = form.querySelector(".propose-status");
+  const button = form.querySelector("button");
+  const f = new FormData(form);
+  const text = String(f.get("text") || "").trim();
+  if (!/[\u1200-\u139f]/u.test(text)) {
+    status.textContent = "Write the term in Ge'ez script (ፊደል).";
+    return;
+  }
+  const body = { text, formation: f.get("formation") || null, note: f.get("note") || null, name: f.get("name") || null };
+  if (form.dataset.concept) body.concept_id = form.dataset.concept;
+  else body.term = form.dataset.term;
+  button.disabled = true;
+  status.textContent = "Sending…";
+  try {
+    const res = await fetch(chatState.proposeEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.detail || `The service answered with an error (${res.status}).`);
+    status.textContent =
+      data.status === "already_listed"
+        ? "That term is already listed above. Thanks!"
+        : data.status === "counted"
+          ? "Someone suggested this too; your vote is counted. Thanks!"
+          : "Thanks! Your suggestion is saved and will be reviewed.";
+    if (data.status !== "already_listed") {
+      form.reset();
+      if (body.concept_id) {
+        pendingCache.delete(body.concept_id);
+        loadPending(body.concept_id);
+      }
+    }
+  } catch (err) {
+    status.textContent = err instanceof TypeError ? "The service could not be reached. Try again shortly." : err.message;
+  } finally {
+    button.disabled = false;
+  }
+}
 
 // ---- AI term suggestions --------------------------------------------------------
 function renderSuggestion(term, data) {
@@ -254,7 +350,8 @@ function renderSuggestion(term, data) {
     ${s.definition_en ? `<p class="def">${esc(s.definition_en)}</p>` : ""}
     ${s.definition_am ? `<p class="def" lang="am">${esc(s.definition_am)}</p>` : ""}
     <table class="terms"><thead><tr><th>Amharic</th><th>Status</th><th>How it was formed</th></tr></thead><tbody>${rows}</tbody></table>
-    <p class="note">Generated by Gemma 4${day ? ` on ${esc(day)}` : ""} and saved for reviewers. It will appear in the glossary as a proposed term once added.</p>`;
+    <p class="note">Generated by Gemma 4${day ? ` on ${esc(day)}` : ""} and saved for reviewers. It will appear in the glossary as a proposed term once added.</p>
+    ${proposeBlock({ term: s.term })}`;
 }
 
 async function requestSuggestion(term) {
@@ -351,6 +448,7 @@ async function setupChat() {
     const cfg = res.ok ? await res.json() : {};
     chatState.endpoint = cfg.chatEndpoint || "";
     chatState.suggestEndpoint = cfg.suggestEndpoint || "";
+    chatState.proposeEndpoint = cfg.proposeEndpoint || "";
   } catch {
     chatState.endpoint = "";
   }
@@ -360,6 +458,15 @@ async function setupChat() {
       if (b) requestSuggestion(b.dataset.term);
     });
     if (state.q) renderResults();
+  }
+  if (chatState.proposeEndpoint) {
+    $("detail").addEventListener("submit", (e) => {
+      const form = e.target.closest(".propose-form");
+      if (!form) return;
+      e.preventDefault();
+      sendProposal(form);
+    });
+    if (state.concepts.length) renderDetail(state.concepts.find((c) => c.id === state.selected)); // add the form to the open card
   }
   if (!chatState.endpoint) return; // chat stays hidden until a Worker is deployed
   for (const id of ["ask", "nav-ask"]) $(id).hidden = false;

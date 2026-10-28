@@ -327,26 +327,29 @@ def pull_suggestions(
     data: Annotated[Path, typer.Option(help="Glossary data directory")] = Path("data/concepts"),
     dry_run: Annotated[bool, typer.Option("--dry-run", help="Show what would change.")] = False,
 ) -> None:
-    """Add stored AI suggestions to the glossary data as proposed terms."""
+    """Add stored AI suggestions and visitor proposals to the data as proposed terms."""
     from . import suggestions as sug
 
     resp = httpx.get(url, timeout=60, follow_redirects=True)
     resp.raise_for_status()
-    result = sug.merge(rec.read_dir(data), resp.json().get("suggestions", []))
-    for item in result.skipped:
+    payload = resp.json()
+    result = sug.merge(rec.read_dir(data), payload.get("suggestions", []))
+    proposals = sug.merge_proposals(result.records, payload.get("proposals", []))
+    for item in [*result.skipped, *proposals.skipped]:
         typer.secho(f"  skipped {item}", dim=True)
-    if not result.added:
-        typer.secho("No new suggestions.", fg="green")
+    if not result.added and not proposals.added:
+        typer.secho("Nothing new to import.", fg="green")
         return
     for cid in result.added:
-        typer.secho(f"  + {cid}", fg="cyan")
+        typer.secho(f"  + {cid} (AI suggestion)", fg="cyan")
+    for label in proposals.added:
+        typer.secho(f"  + {label} (visitor proposal)", fg="cyan")
+    summary = f"{len(result.added)} AI-suggested concepts, {len(proposals.added)} visitor proposals"
     if dry_run:
-        typer.secho(f"Dry run: {len(result.added)} concepts would be added.", fg="yellow")
+        typer.secho(f"Dry run: would add {summary}.", fg="yellow")
         return
-    rec.write_domain_files(result.records, data)
-    typer.secho(
-        f"Added {len(result.added)} concepts as proposed AI suggestions to {data}/", fg="green"
-    )
+    rec.write_domain_files(proposals.records, data)
+    typer.secho(f"Added {summary} to {data}/ (all proposed).", fg="green")
 
 
 @admin.command("init-db")

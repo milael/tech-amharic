@@ -101,7 +101,9 @@ uv run tam admin pull-suggestions --dry-run   # see what would be added
 uv run tam admin pull-suggestions             # add them to data/concepts as proposed terms
 ```
 
-The `suggestions.yml` workflow does this weekly and opens a pull request. Every imported term is `proposed`, with a source naming the model and date; nothing reaches the published dataset until a reviewer approves it.
+Every concept card also has **Suggest a better term**, where anyone can send an Amharic alternative with an optional note and name. Proposals are checked (Ge'ez script, not already listed, rate-limited), stored next to the AI suggestions, and imported as `proposed` terms whose source reads "Proposed on the demo by … (unverified)". Repeats of the same term are counted, which shows reviewers which alternatives have support.
+
+The `suggestions.yml` workflow imports both weekly and opens a pull request. Every imported term is `proposed`, with a source naming the model and date; nothing reaches the published dataset until a reviewer approves it.
 
 ## Evaluating a model
 

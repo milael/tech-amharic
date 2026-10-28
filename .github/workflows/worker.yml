@@ -103,6 +103,11 @@ jobs:
           else
             echo "::error title=Suggestion failed::$(printf '%s' "$sug" | esc)"; fail=1
           fi
+          # Visitor proposals: check validation and listing without storing anything.
+          pcode=$(curl -sS -o /dev/null -w '%{http_code}' -X POST "$url/propose" -H "Origin: https://milael.github.io" -H "Content-Type: application/json" -d '{"concept_id":"encryption","text":"latin text"}' || true)
+          [ "$pcode" = "400" ] || { echo "::error title=Propose check::expected 400 for a Latin-script term, got $pcode"; fail=1; }
+          plist=$(curl -sS -m 30 "$url/proposals?concept=load-balancer" | jq -c '.proposals' || echo null)
+          [ "$plist" != "null" ] && echo "::notice title=Visitor proposals (load-balancer)::$plist" || { echo "::error title=Proposals list failed::$plist"; fail=1; }
           # Wrong origins must be refused.
           bad=$(curl -sS -o /dev/null -w '%{http_code}' -X POST "$url/chat" -H "Origin: https://evil.example" -H "Content-Type: application/json" -d '{"question":"hi"}' || true)
           [ "$bad" = "403" ] || { echo "::error title=Origin check::expected 403, got $bad"; fail=1; }
