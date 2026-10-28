@@ -31,6 +31,58 @@ DEFAULT_TOP_K = 5
 
 _WORD = re.compile(r"[\wሀ-᎟ⶀ-⷟꬀-꬯]+", re.UNICODE)
 _STATUS_RANK = {TermStatus.PREFERRED: 0, TermStatus.ADMITTED: 1, TermStatus.PROPOSED: 2}
+# Everyday English words that are glossary entries (UI commands in the ELRC
+# dictionary) but should not pull a concept into a chat prompt on their own.
+# Keep in step with STOPWORDS in worker/src/chat-core.js.
+_STOPWORDS = frozenset(
+    {
+        "about",
+        "answer",
+        "ask",
+        "back",
+        "cancel",
+        "close",
+        "day",
+        "do",
+        "done",
+        "explain",
+        "find",
+        "go",
+        "help",
+        "how",
+        "know",
+        "like",
+        "make",
+        "mean",
+        "more",
+        "need",
+        "new",
+        "next",
+        "no",
+        "now",
+        "ok",
+        "open",
+        "question",
+        "say",
+        "see",
+        "show",
+        "start",
+        "stop",
+        "tell",
+        "time",
+        "today",
+        "try",
+        "use",
+        "want",
+        "what",
+        "when",
+        "where",
+        "which",
+        "why",
+        "year",
+        "yes",
+    }
+)
 
 
 # ---------------------------------------------------------------- retrieval
@@ -77,6 +129,44 @@ class Query:
         return cls(frozenset(grams), norm_key(question), acronyms)
 
 
+def _span(text: str) -> tuple[str, ...]:
+    return tuple(k for k in (norm_key(w) for w in _WORD.findall(text)) if k)
+
+
+def _match(concept: ConceptRecord, query: Query) -> tuple[int, list[tuple[str, ...]]]:
+    """Score plus the matched terms as word-key tuples (see score_concept)."""
+    score, spans = 0, []
+    for term in concept["terms"]:
+        text = term["text"]
+        key = norm_key(text)
+        if not key:
+            continue
+        if _is_acronym(text):
+            if text in query.acronyms:
+                score, spans = score + 3, [*spans, (key,)]
+        elif key in query.grams or _singular_term(text) in query.grams:
+            if key not in _STOPWORDS:
+                score, spans = score + 3, [*spans, _span(text)]
+        elif _is_ethiopic_key(key) and len(key) >= 2 and key in query.folded:
+            score, spans = score + 2, [*spans, _span(text)]
+    return score, spans
+
+
+def _singular_term(text: str) -> str:
+    """Singular of a term's last word only: 'Save As' stays 'saveas'."""
+    words = _span(text)
+    return "".join([*words[:-1], _singular(words[-1])]) if words else ""
+
+
+def _inside(short: tuple[str, ...], long: tuple[str, ...]) -> bool:
+    n = len(short)
+    if n < len(long) and any(long[i : i + n] == short for i in range(len(long) - n + 1)):
+        return True
+    # Ge'ez terms match inside words, so compare letters: ኮም lies inside ኮምፒውተር.
+    a, b = "".join(short), "".join(long)
+    return _is_ethiopic_key(a) and len(a) < len(b) and a in b
+
+
 def score_concept(concept: ConceptRecord, query: Query) -> int:
     """How strongly a question mentions a concept.
 
@@ -87,30 +177,23 @@ def score_concept(concept: ConceptRecord, query: Query) -> int:
       prefixes and suffixes (የምስጠራ, ምስጠራን), so substring matching is
       right for Ge'ez; for Latin script it would match "it" inside "with".
     """
-    score = 0
-    for term in concept["terms"]:
-        text = term["text"]
-        key = norm_key(text)
-        if not key:
-            continue
-        if _is_acronym(text):
-            if text in query.acronyms:
-                score += 3
-        elif key in query.grams or _singular(key) in query.grams:
-            score += 3
-        elif _is_ethiopic_key(key) and len(key) >= 2 and key in query.folded:
-            score += 2
-    return score
+    return _match(concept, query)[0]
 
 
 def retrieve(
     concepts: Iterable[ConceptRecord], question: str, k: int = DEFAULT_TOP_K
 ) -> list[ConceptRecord]:
-    """Top-k concepts mentioned in the question, best first (ties by id)."""
+    """Top-k concepts mentioned in the question, best first (ties by id).
+
+    A concept is dropped when every term it matched lies inside a longer
+    matched term of another concept: "load balancer" beats "load".
+    """
     query = Query.parse(question)
-    scored = [(score_concept(c, query), c["id"], c) for c in concepts]
-    hits = [s for s in scored if s[0] > 0]
-    hits.sort(key=lambda s: (-s[0], s[1]))
+    matched = [(*_match(c, query), c) for c in concepts]
+    hits = [m for m in matched if m[0] > 0]
+    all_spans = [s for _, spans, _ in hits for s in spans]
+    hits = [m for m in hits if not all(any(_inside(s, o) for o in all_spans) for s in m[1])]
+    hits.sort(key=lambda m: (-m[0], m[2]["id"]))
     return [c for _, _, c in hits[:k]]
 
 

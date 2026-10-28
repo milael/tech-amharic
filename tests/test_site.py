@@ -46,3 +46,12 @@ def test_js_normalization_tables_match_python(js_file: str) -> None:
 
     assert table("ROW_FOLDS") == normalize._ROW_FOLDS
     assert table("ORDER_FOLDS") == normalize._ORDER_FOLDS
+
+
+def test_chat_stopwords_match_python() -> None:
+    from tech_amharic import chat
+
+    js = (ROOT / "worker/src/chat-core.js").read_text(encoding="utf-8")
+    body = re.search(r"const STOPWORDS = new Set\(\[([^\]]*)\]\)", js)
+    assert body
+    assert set(re.findall(r'"([^"]+)"', body[1])) == chat._STOPWORDS

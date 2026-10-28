@@ -2,7 +2,7 @@
 
 An open, reviewed, concept-oriented termbase for computing and technology terms in Amharic, with an API, a contributor web app, a CLI, a Hugging Face dataset and an evaluation harness for language models.
 
-> **Status: v0.1, pre-review.** The 121 seed concepts in `data/concepts/` carry *proposed* Amharic terms only. They are a starting draft for human reviewers, not a recommendation. Nothing is published until a reviewer approves it.
+> **Status: v0.1, pre-review.** `data/concepts/` holds about 2,900 concepts: 121 AI-drafted seed concepts, the 2,828-entry ELRC ICT dictionary, and AI and visitor suggestions. Every Amharic term is *proposed* and names its source. Nothing is published until a reviewer approves it.
 
 **Live demo:** https://milael.github.io/tech-amharic/ (search and browse the termbase in the browser; rebuilt from `data/concepts/` on every push).
 
@@ -77,6 +77,17 @@ The container applies Alembic migrations on start. PostgreSQL adds a trigram ind
 4. `tam admin build` exports the database back to `data/concepts/`, a release bundle, TBX/CSV and the dataset. Commit the data diff; tag `v*` to publish a GitHub release.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and the reviewer [style guide](docs/STYLE_GUIDE.md).
+
+## Data sources
+
+| Source | Terms | How it got here | Label on the demo |
+| --- | --- | --- | --- |
+| ELRC ICT dictionary: *Translation of ICT Terms into three major Ethiopian Languages* (ICT Development Office & Ethiopian Languages Research Center, 2011) | 2,828 entries, Office/OS-era vocabulary | `scripts/elrc_extract.py` (PDF → `data/sources/elrc-ict-glossary-2011.jsonl`, all three languages kept) then `scripts/import_elrc.py` | **ELRC**, with the entry number |
+| Seed drafts by AI (Claude) | 121 modern concepts (AI, security, cloud) | Written by hand-prompted AI | **AI draft** |
+| AI suggestions (Gemma 4) | Grows from demo searches | Weekly import PR | **AI draft** |
+| Demo visitors | Grows from "Suggest a better term" | Weekly import PR | **Visitor** |
+
+The ELRC import adds an entry's Amharic term to an existing concept when the English matches, and creates a new concept otherwise (domain assigned by keywords, so expect some misfiled concepts). A few English words mean something else in ELRC (token, prompt, model, filter, function, framework, display, library) and are kept as separate concepts. Re-running the import changes nothing.
 
 ## Ask questions in Amharic (termbase-grounded chat)
 

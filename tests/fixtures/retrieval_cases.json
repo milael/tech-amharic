@@ -748,6 +748,102 @@
      "text": "ተጠቃሚ"
     }
    ]
+  },
+  {
+   "domain": "general",
+   "id": "load",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "load"
+    },
+    {
+     "lang": "am",
+     "status": "proposed",
+     "text": "ጫን"
+    }
+   ]
+  },
+  {
+   "domain": "networking",
+   "id": "load-balancer",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "load balancer"
+    },
+    {
+     "lang": "am",
+     "status": "proposed",
+     "text": "ጭነት አመጣጣኝ"
+    }
+   ]
+  },
+  {
+   "domain": "general",
+   "id": "today",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "today"
+    },
+    {
+     "lang": "am",
+     "status": "proposed",
+     "text": "ዛሬ"
+    }
+   ]
+  },
+  {
+   "domain": "software",
+   "id": "save-as",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "Save As"
+    },
+    {
+     "lang": "am",
+     "status": "proposed",
+     "text": "እንደ ...አስቀምጥ"
+    }
+   ]
+  },
+  {
+   "domain": "general",
+   "id": "com",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "com"
+    },
+    {
+     "lang": "am",
+     "status": "proposed",
+     "text": "ኮም"
+    }
+   ]
+  },
+  {
+   "domain": "hardware",
+   "id": "computer",
+   "terms": [
+    {
+     "lang": "en",
+     "status": "preferred",
+     "text": "computer"
+    },
+    {
+     "lang": "am",
+     "status": "proposed",
+     "text": "ኮምፒውተር"
+    }
+   ]
   }
  ],
  "cases": [
@@ -787,7 +883,6 @@
    "question": "What is a large language model and what is a token?",
    "expected": [
     "large-language-model",
-    "ml-model",
     "token-nlp"
    ]
   },
@@ -839,6 +934,28 @@
    "question": "የምሥጠራ ጥቅም ምንድን ነው?",
    "expected": [
     "encryption"
+   ]
+  },
+  {
+   "question": "How does a load balancer work?",
+   "expected": [
+    "load-balancer"
+   ]
+  },
+  {
+   "question": "Can you load this file?",
+   "expected": [
+    "load"
+   ]
+  },
+  {
+   "question": "How do I save a file?",
+   "expected": []
+  },
+  {
+   "question": "ኮምፒውተር እንዴት ይሰራል?",
+   "expected": [
+    "computer"
    ]
   }
  ]

@@ -39,6 +39,8 @@ Human-reviewed English–Amharic terminology for computing and technology, expor
 
 Every Amharic term in this dataset was approved by a reviewer in the Tech-Amharic workflow. Unreviewed proposals are excluded. Splits are assigned per concept with a stable hash, so all rows from one concept share a split. Instruction rows are generated from templates (`origin: template`).
 
+Candidate terms come from the ELRC ICT dictionary (ICT Development Office & Ethiopian Languages Research Center, 2011), AI drafts (Claude seed set, Gemma 4 suggestions) and visitor proposals. Each term keeps its source, so you can filter by origin.
+
 ## Limitations
 
 - Small and growing; domain coverage is uneven early on.

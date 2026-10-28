@@ -10,6 +10,54 @@ export const DEFAULT_TOP_K = 5;
 
 const WORD = /[\p{L}\p{N}_ሀ-᎟ⶀ-⷟꬀-꬯]+/gu;
 const STATUS_RANK = { preferred: 0, admitted: 1, proposed: 2 };
+// Keep in step with _STOPWORDS in src/tech_amharic/chat.py.
+const STOPWORDS = new Set([
+  "about",
+  "answer",
+  "ask",
+  "back",
+  "cancel",
+  "close",
+  "day",
+  "do",
+  "done",
+  "explain",
+  "find",
+  "go",
+  "help",
+  "how",
+  "know",
+  "like",
+  "make",
+  "mean",
+  "more",
+  "need",
+  "new",
+  "next",
+  "no",
+  "now",
+  "ok",
+  "open",
+  "question",
+  "say",
+  "see",
+  "show",
+  "start",
+  "stop",
+  "tell",
+  "time",
+  "today",
+  "try",
+  "use",
+  "want",
+  "what",
+  "when",
+  "where",
+  "which",
+  "why",
+  "year",
+  "yes",
+]);
 
 const isEthiopicKey = (key) => [...key].some((ch) => isEthiopicCodePoint(ch.codePointAt(0)));
 
@@ -42,30 +90,58 @@ export function parseQuery(question) {
   return { grams, folded: normKey(question), acronyms };
 }
 
-export function scoreConcept(concept, query) {
+const span = (text) => (String(text).match(WORD) || []).map(normKey).filter(Boolean);
+
+function match(concept, query) {
   let score = 0;
+  const spans = [];
   for (const term of concept.terms) {
     const key = normKey(term.text);
     if (!key) continue;
     if (isAcronym(term.text)) {
-      if (query.acronyms.has(term.text)) score += 3;
-    } else if (query.grams.has(key) || query.grams.has(singular(key))) {
-      score += 3;
+      if (query.acronyms.has(term.text)) { score += 3; spans.push([key]); }
+    } else if (query.grams.has(key) || query.grams.has(singularTerm(term.text))) {
+      if (!STOPWORDS.has(key)) { score += 3; spans.push(span(term.text)); }
     } else if (isEthiopicKey(key) && [...key].length >= 2 && query.folded.includes(key)) {
       score += 2;
+      spans.push(span(term.text));
     }
   }
-  return score;
+  return { score, spans };
 }
 
+// Singular of a term's last word only: "Save As" stays "saveas".
+function singularTerm(text) {
+  const words = span(text);
+  return words.length ? [...words.slice(0, -1), singular(words[words.length - 1])].join("") : "";
+}
+
+function inside(short, long) {
+  const n = short.length;
+  for (let i = 0; n < long.length && i + n <= long.length; i++) {
+    if (short.every((k, j) => long[i + j] === k)) return true;
+  }
+  // Ge'ez terms match inside words, so compare letters: ኮም lies inside ኮምፒውተር.
+  const a = short.join("");
+  const b = long.join("");
+  return isEthiopicKey(a) && [...a].length < [...b].length && b.includes(a);
+}
+
+export function scoreConcept(concept, query) {
+  return match(concept, query).score;
+}
+
+// A concept is dropped when every term it matched lies inside a longer
+// matched term of another concept: "load balancer" beats "load".
 export function retrieve(concepts, question, k = DEFAULT_TOP_K) {
   const query = parseQuery(question);
-  return concepts
-    .map((c) => [scoreConcept(c, query), c.id, c])
-    .filter(([s]) => s > 0)
-    .sort((a, b) => b[0] - a[0] || (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0))
+  const hits = concepts.map((c) => ({ c, ...match(c, query) })).filter((h) => h.score > 0);
+  const all = hits.flatMap((h) => h.spans);
+  return hits
+    .filter((h) => !h.spans.every((s) => all.some((o) => inside(s, o))))
+    .sort((a, b) => b.score - a.score || (a.c.id < b.c.id ? -1 : a.c.id > b.c.id ? 1 : 0))
     .slice(0, k)
-    .map(([, , c]) => c);
+    .map((h) => h.c);
 }
 
 export function headword(c) {
