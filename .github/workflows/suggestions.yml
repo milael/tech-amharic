@@ -2,6 +2,8 @@ name: Import AI suggestions
 
 # Weekly: add AI term suggestions stored by the chat Worker to the glossary
 # data as *proposed* terms, on a branch with a pull request for review.
+# Needs Settings > Actions > General > "Allow GitHub Actions to create and
+# approve pull requests" (enabled 2026-10-28).
 on:
   schedule:
     - cron: "17 6 * * 1" # Mondays 06:17 UTC
