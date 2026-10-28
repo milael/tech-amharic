@@ -1,3 +1,4 @@
 {
-  "chatEndpoint": "https://tech-amharic-chat.milael.workers.dev/chat"
+  "chatEndpoint": "https://tech-amharic-chat.milael.workers.dev/chat",
+  "suggestEndpoint": "https://tech-amharic-chat.milael.workers.dev/suggest"
 }

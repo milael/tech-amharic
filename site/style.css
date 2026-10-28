@@ -87,6 +87,10 @@ nav a:hover { color: var(--ink); }
 .results .am { grid-column: 1; color: var(--muted); font-size: 17px; }
 .results .dom { grid-row: 1; grid-column: 2; font-size: 13px; color: var(--muted); }
 .empty { color: var(--muted); padding: 16px 8px; }
+.suggest-btn {
+  display: block; margin-top: 12px; font: 600 15px var(--ui); padding: 10px 16px; border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--preferred); background: var(--preferred); color: var(--paper);
+}
 
 .detail { position: sticky; top: 16px; background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 28px; min-height: 320px; }
 .detail .path { font-size: 14px; color: var(--muted); margin: 0 0 4px; }
@@ -108,6 +112,7 @@ nav a:hover { color: var(--ink); }
 .badge.preferred { color: var(--preferred); background: var(--preferred-tint); }
 .badge.admitted { color: var(--preferred); background: transparent; box-shadow: inset 0 0 0 1px var(--preferred); }
 .badge.proposed, .badge.changes_requested { color: var(--proposed); background: var(--proposed-tint); }
+.badge.ai { color: var(--muted); background: transparent; box-shadow: inset 0 0 0 1px var(--rule); font-weight: 500; }
 .badge.deprecated, .badge.rejected { color: var(--deprecated); background: var(--deprecated-tint); }
 
 /* ask */

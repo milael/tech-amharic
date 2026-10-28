@@ -10,6 +10,8 @@ question it:
 3. asks **Gemma 4 26B** (`@cf/google/gemma-4-26b-a4b-it`) on Workers AI to answer in Amharic using those terms,
 4. returns the answer, the concepts it drew on, and simple checks (Ge'ez script share, which terms were used).
 
+It also serves AI term suggestions: `POST /suggest {"term": "..."}` returns an existing concept, a stored suggestion, or a new one from Gemma 4 (approved glossary terms are given as examples), saved in the `SUGGESTIONS` KV namespace. `GET /suggestions` lists them for `tam admin pull-suggestions`. The deploy workflow creates the KV namespace on first deploy.
+
 No API key reaches the browser. On the Workers Free plan the model allowance
 is 10,000 neurons a day (very roughly 200 answers); after that Workers AI
 refuses requests until midnight UTC, there are no charges, and the page shows

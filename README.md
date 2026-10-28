@@ -92,6 +92,17 @@ uv run tam ask "How does a firewall work?" --show-prompt   # inspect the prompt 
 - **Public demo:** a Cloudflare Worker running Gemma 4 26B on the Workers AI free tier. Setup: [worker/README.md](worker/README.md).
 - **Shared logic:** the prompt lives in `src/tech_amharic/chat_prompt.txt`; `tests/fixtures/retrieval_cases.json` keeps the Python and JavaScript retrieval identical.
 
+## AI term suggestions
+
+When a glossary search finds nothing, the demo offers **Suggest an Amharic term with AI**. Gemma 4 proposes 1–3 Amharic options with a domain and definitions, using the glossary's *approved* terms as examples, so suggestions follow reviewers' decisions more closely as approvals grow. Suggestions are stored in Cloudflare KV and are clearly labelled as unreviewed AI drafts.
+
+```bash
+uv run tam admin pull-suggestions --dry-run   # see what would be added
+uv run tam admin pull-suggestions             # add them to data/concepts as proposed terms
+```
+
+The `suggestions.yml` workflow does this weekly and opens a pull request. Every imported term is `proposed`, with a source naming the model and date; nothing reaches the published dataset until a reviewer approves it.
+
 ## Evaluating a model
 
 ```bash

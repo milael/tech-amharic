@@ -319,6 +319,36 @@ def _database():  # type: ignore[no-untyped-def]
     return Database(get_settings().database_url)
 
 
+@admin.command("pull-suggestions")
+def pull_suggestions(
+    url: Annotated[str, typer.Option(help="Worker /suggestions URL")] = (
+        "https://tech-amharic-chat.milael.workers.dev/suggestions"
+    ),
+    data: Annotated[Path, typer.Option(help="Glossary data directory")] = Path("data/concepts"),
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Show what would change.")] = False,
+) -> None:
+    """Add stored AI suggestions to the glossary data as proposed terms."""
+    from . import suggestions as sug
+
+    resp = httpx.get(url, timeout=60, follow_redirects=True)
+    resp.raise_for_status()
+    result = sug.merge(rec.read_dir(data), resp.json().get("suggestions", []))
+    for item in result.skipped:
+        typer.secho(f"  skipped {item}", dim=True)
+    if not result.added:
+        typer.secho("No new suggestions.", fg="green")
+        return
+    for cid in result.added:
+        typer.secho(f"  + {cid}", fg="cyan")
+    if dry_run:
+        typer.secho(f"Dry run: {len(result.added)} concepts would be added.", fg="yellow")
+        return
+    rec.write_domain_files(result.records, data)
+    typer.secho(
+        f"Added {len(result.added)} concepts as proposed AI suggestions to {data}/", fg="green"
+    )
+
+
 @admin.command("init-db")
 def init_db() -> None:
     """Create tables directly (development). Production: `alembic upgrade head`."""
