@@ -54,7 +54,7 @@ function normKey(text) {
 // ---- state ------------------------------------------------------------------
 const state = { concepts: [], q: "", domain: "", selected: null };
 const MAX_LISTED = 150; // keeps the list fast with thousands of concepts
-const IMPORTED = /^Imported from the ELRC/;
+const IMPORTED = /^Imported from the (ELRC|Microsoft)/;
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
@@ -142,8 +142,9 @@ function renderDetail(c) {
       const ai = (t.sources || []).some((s) => AI_SOURCE.test(s.citation || ""));
       const visitor = (t.sources || []).some((s) => VISITOR_SOURCE.test(s.citation || ""));
       const elrc = (t.sources || []).some((s) => ELRC_SOURCE.test(s.citation || ""));
+      const msdlc = (t.sources || []).some((s) => DLC_SOURCE.test(s.citation || ""));
       return `<tr><td lang="am">${esc(t.text)}${src ? `<div class="src">${src}</div>` : ""}</td>
-        <td><span class="badge ${esc(t.status)}">${esc(STATUS_LABEL[t.status] || t.status)}</span>${ai ? ' <span class="badge ai">AI draft</span>' : ""}${visitor ? ' <span class="badge ai">Visitor</span>' : ""}${elrc ? ' <span class="badge ai" title="ELRC ICT dictionary, 2011">ELRC</span>' : ""}</td>
+        <td><span class="badge ${esc(t.status)}">${esc(STATUS_LABEL[t.status] || t.status)}</span>${ai ? ' <span class="badge ai">AI draft</span>' : ""}${visitor ? ' <span class="badge ai">Visitor</span>' : ""}${elrc ? ' <span class="badge ai" title="ELRC ICT dictionary, 2011">ELRC</span>' : ""}${msdlc ? ' <span class="badge ai" title="Microsoft Digital Literacy Curriculum, Amharic, 2007">Microsoft</span>' : ""}</td>
         <td>${esc(FORMATION_LABEL[t.formation] || "Not recorded")}</td></tr>`;
     })
     .join("");
@@ -238,6 +239,7 @@ const SUGGESTABLE = /^[A-Za-z][A-Za-z0-9 .+#/&'-]{1,59}$/;
 const AI_SOURCE = /^(Seed draft by AI|AI suggestion)/;
 const VISITOR_SOURCE = /^Proposed on the demo by/;
 const ELRC_SOURCE = /^ELRC dictionary/;
+const DLC_SOURCE = /^Microsoft Digital Literacy/;
 
 // ---- visitor proposals ("Suggest a better term") ---------------------------------
 const pendingCache = new Map(); // concept id -> proposals awaiting review

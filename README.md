@@ -83,6 +83,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and the reviewer [style guide](docs/STYLE
 | Source | Terms | How it got here | Label on the demo |
 | --- | --- | --- | --- |
 | ELRC ICT dictionary: *Translation of ICT Terms into three major Ethiopian Languages* (ICT Development Office & Ethiopian Languages Research Center, 2011) | 2,828 entries, Office/OS-era vocabulary | `scripts/elrc_extract.py` (PDF → `data/sources/elrc-ict-glossary-2011.jsonl`, all three languages kept) then `scripts/import_elrc.py` | **ELRC**, with the entry number |
+| Microsoft Digital Literacy Curriculum, Amharic edition (© 2007 Microsoft): Computer Basics, Computer Security and Privacy, Digital Lifestyles, The Internet and the World Wide Web, Productivity Programs | 201 terms: 153 from the five book glossaries, 48 "Amharic (English)" pairs from the course text | Curated in `data/sources/microsoft-dlc-amharic-2007.jsonl` (glossary English paired by AI from the English edition's order; the Productivity Programs glossary read from page images because its text layer is garbled), then `scripts/import_dlc.py`. Terms only; definitions are not copied | **Microsoft** |
 | Seed drafts by AI (Claude) | 121 modern concepts (AI, security, cloud) | Written by hand-prompted AI | **AI draft** |
 | AI suggestions (Gemma 4) | Grows from demo searches | Weekly import PR | **AI draft** |
 | Demo visitors | Grows from "Suggest a better term" | Weekly import PR | **Visitor** |
