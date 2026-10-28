@@ -17,6 +17,14 @@ import {
   retrieve,
   validateQuestion,
 } from "./chat-core.js";
+import {
+  buildSuggestMessages,
+  findExisting,
+  parseSuggestion,
+  pickExamples,
+  storageKey,
+  validateTerm,
+} from "./suggest-core.js";
 
 const DEFAULT_MODEL = "@cf/google/gemma-4-26b-a4b-it";
 const BUNDLE_TTL_MS = 10 * 60 * 1000;
@@ -87,7 +95,72 @@ function outputShape(out) {
 
 const isQuotaError = (err) => /4006|neuron|daily|allocation|quota/i.test(String(err?.message || err));
 
-export function createHandler(SYSTEM_PROMPT, fetchImpl = fetch) {
+const DAILY_LIMIT_DETAIL =
+  "የዛሬው ነፃ የጥያቄ ገደብ ተሞልቷል። ነገ እንደገና ይሞክሩ። (Today's free limit is used up. Try again tomorrow.)";
+
+async function listSuggestions(env) {
+  const out = [];
+  let cursor;
+  do {
+    const page = await env.SUGGESTIONS.list({ prefix: "s:", cursor });
+    for (const k of page.keys) {
+      const value = await env.SUGGESTIONS.get(k.name, "json");
+      if (value && !value.notTechTerm) out.push(value);
+    }
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+  return out.sort((a, b) => (a.created_at < b.created_at ? -1 : 1));
+}
+
+export function createHandler(SYSTEM_PROMPT, fetchImpl = fetch, SUGGEST_PROMPT = "") {
+  async function suggest(request, env, headers) {
+    let term;
+    try {
+      term = validateTerm((await request.json())?.term);
+    } catch (err) {
+      const detail = err instanceof RangeError ? err.message : 'Send JSON like {"term": "kubernetes"}.';
+      return json({ error: "bad_request", detail }, 400, headers);
+    }
+    let concepts;
+    try {
+      concepts = await loadConcepts(env, fetchImpl);
+    } catch (err) {
+      console.error("bundle load failed", String(err));
+      return json({ error: "termbase_unavailable", detail: "The glossary could not be loaded. Try again shortly." }, 503, headers);
+    }
+    const existing = findExisting(concepts, term);
+    if (existing) return json({ status: "exists", concept_id: existing.id }, 200, headers);
+
+    const key = storageKey(term);
+    const cached = env.SUGGESTIONS ? await env.SUGGESTIONS.get(key, "json") : null;
+    if (cached) return json({ status: cached.notTechTerm ? "not_tech_term" : "cached", suggestion: cached }, 200, headers);
+
+    const examples = pickExamples(concepts, term);
+    const model = env.MODEL || DEFAULT_MODEL;
+    let parsed;
+    try {
+      const out = await env.AI.run(model, {
+        messages: buildSuggestMessages(SUGGEST_PROMPT, term, examples),
+        max_tokens: Number(env.MAX_TOKENS || 2048),
+        temperature: 0.2,
+      });
+      parsed = parseSuggestion(modelText(out));
+    } catch (err) {
+      if (isQuotaError(err)) return json({ error: "daily_limit", detail: DAILY_LIMIT_DETAIL }, 429, headers);
+      console.error("suggestion failed", String(err));
+      return json({ error: "suggestion_failed", detail: "The model could not suggest a term. Try again shortly." }, 502, headers);
+    }
+    const record = parsed.notTechTerm
+      ? { term, notTechTerm: true, model, created_at: new Date().toISOString() }
+      : { term, ...parsed, model, examples_used: examples.length, created_at: new Date().toISOString() };
+    let stored = false;
+    if (env.SUGGESTIONS) {
+      await env.SUGGESTIONS.put(key, JSON.stringify(record));
+      stored = true;
+    }
+    return json({ status: parsed.notTechTerm ? "not_tech_term" : "generated", suggestion: record, stored }, 200, headers);
+  }
+
   return {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -98,8 +171,15 @@ export function createHandler(SYSTEM_PROMPT, fetchImpl = fetch) {
     if (request.method === "GET" && (url.pathname === "/" || url.pathname === "/health")) {
       return json({ ok: true, model: env.MODEL || DEFAULT_MODEL }, 200, headers);
     }
-    if (url.pathname !== "/chat" || request.method !== "POST") {
-      return json({ error: "not_found", detail: "Use POST /chat." }, 404, headers);
+    // Public read of stored AI suggestions, for `tam admin pull-suggestions`.
+    if (request.method === "GET" && url.pathname === "/suggestions") {
+      if (!env.SUGGESTIONS) return json({ count: 0, suggestions: [] }, 200, headers);
+      const suggestions = await listSuggestions(env);
+      return json({ count: suggestions.length, suggestions }, 200, headers);
+    }
+    const route = request.method === "POST" ? url.pathname : null;
+    if (route !== "/chat" && route !== "/suggest") {
+      return json({ error: "not_found", detail: "Use POST /chat or POST /suggest." }, 404, headers);
     }
     if (!allowed) return json({ error: "forbidden_origin", detail: "This site may not use the chat." }, 403, headers);
     if (Number(request.headers.get("Content-Length") || 0) > MAX_BODY_BYTES) {
@@ -108,11 +188,12 @@ export function createHandler(SYSTEM_PROMPT, fetchImpl = fetch) {
 
     const ip = request.headers.get("CF-Connecting-IP") || "unknown";
     if (env.RATE_LIMITER) {
-      const { success } = await env.RATE_LIMITER.limit({ key: `chat:${ip}` });
+      const { success } = await env.RATE_LIMITER.limit({ key: `${route}:${ip}` });
       if (!success) {
-        return json({ error: "rate_limited", detail: "Too many questions. Wait a minute and try again." }, 429, headers);
+        return json({ error: "rate_limited", detail: "Too many requests. Wait a minute and try again." }, 429, headers);
       }
     }
+    if (route === "/suggest") return suggest(request, env, headers);
 
     let question;
     let history;
@@ -145,11 +226,7 @@ export function createHandler(SYSTEM_PROMPT, fetchImpl = fetch) {
       if (!answer) shape = outputShape(out);
     } catch (err) {
       if (isQuotaError(err)) {
-        return json(
-          { error: "daily_limit", detail: "የዛሬው ነፃ የጥያቄ ገደብ ተሞልቷል። ነገ እንደገና ይሞክሩ። (Today's free limit is used up. Try again tomorrow.)" },
-          429,
-          headers,
-        );
+        return json({ error: "daily_limit", detail: DAILY_LIMIT_DETAIL }, 429, headers);
       }
       console.error("model call failed", String(err));
       return json({ error: "model_error", detail: "The language model did not answer. Try again shortly." }, 502, headers);

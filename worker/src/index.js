@@ -13,6 +13,7 @@
 // src/tech_amharic/chat_prompt.txt (bundled by wrangler as a text module).
 
 import SYSTEM_PROMPT from "../../src/tech_amharic/chat_prompt.txt";
+import SUGGEST_PROMPT from "../../src/tech_amharic/suggest_prompt.txt";
 import { createHandler } from "./handler.js";
 
-export default createHandler(SYSTEM_PROMPT);
+export default createHandler(SYSTEM_PROMPT, fetch, SUGGEST_PROMPT);

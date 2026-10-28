@@ -23,3 +23,9 @@ namespace_id = "1001"
   [ratelimits.simple]
   limit = 6
   period = 60
+
+# AI term suggestions, stored for reviewers. The deploy workflow creates the
+# namespace on first deploy and fills in its id.
+[[kv_namespaces]]
+binding = "SUGGESTIONS"
+id = "KV_NAMESPACE_ID_PLACEHOLDER"

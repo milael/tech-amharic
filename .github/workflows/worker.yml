@@ -5,9 +5,9 @@ name: Chat worker
 on:
   push:
     branches: [main]
-    paths: [worker/**, src/tech_amharic/chat_prompt.txt, tests/fixtures/**, .github/workflows/worker.yml]
+    paths: [worker/**, src/tech_amharic/chat_prompt.txt, src/tech_amharic/suggest_prompt.txt, tests/fixtures/**, .github/workflows/worker.yml]
   pull_request:
-    paths: [worker/**, src/tech_amharic/chat_prompt.txt, tests/fixtures/**]
+    paths: [worker/**, src/tech_amharic/chat_prompt.txt, src/tech_amharic/suggest_prompt.txt, tests/fixtures/**]
   workflow_dispatch:
 
 permissions:
@@ -31,6 +31,24 @@ jobs:
         run: npm test
       - name: Bundle check
         run: npx --yes wrangler@4 deploy --dry-run --outdir dist
+      - name: Provision KV namespace for AI suggestions
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && env.CLOUDFLARE_API_TOKEN != ''
+        run: |
+          find_id() {
+            npx --yes wrangler@4 kv namespace list 2>/dev/null | python3 -c '
+          import json, sys
+          text = sys.stdin.read()
+          data = json.loads(text[text.index("["): text.rindex("]") + 1])
+          print(next((n["id"] for n in data if n["title"].endswith("tech-amharic-suggestions")), ""))'
+          }
+          id=$(find_id || true)
+          if [ -z "$id" ]; then
+            npx --yes wrangler@4 kv namespace create tech-amharic-suggestions
+            id=$(find_id)
+          fi
+          [ -n "$id" ] || { echo "::error title=KV::could not find or create the namespace"; exit 1; }
+          sed -i "s/KV_NAMESPACE_ID_PLACEHOLDER/$id/" wrangler.toml
+          echo "::notice title=KV namespace::tech-amharic-suggestions ready"
       - name: Deploy to Cloudflare
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && env.CLOUDFLARE_API_TOKEN != ''
         id: deploy
@@ -77,6 +95,14 @@ jobs:
               fail=1
             fi
           done
+          # AI suggestion round trip (generated or cached).
+          sug=$(curl -sS -m 120 -X POST "$url/suggest" -H "Origin: https://milael.github.io" -H "Content-Type: application/json" -d '{"term":"kubernetes"}' || true)
+          status=$(echo "$sug" | jq -r '.status // .error // "no-response"')
+          if [ "$status" = "generated" ] || [ "$status" = "cached" ]; then
+            echo "::notice title=Suggestion ($status)::$(echo "$sug" | jq -c '{term: .suggestion.term, domain: .suggestion.domain, terms: .suggestion.terms, definition_am: .suggestion.definition_am}' | esc)"
+          else
+            echo "::error title=Suggestion failed::$(printf '%s' "$sug" | esc)"; fail=1
+          fi
           # Wrong origins must be refused.
           bad=$(curl -sS -o /dev/null -w '%{http_code}' -X POST "$url/chat" -H "Origin: https://evil.example" -H "Content-Type: application/json" -d '{"question":"hi"}' || true)
           [ "$bad" = "403" ] || { echo "::error title=Origin check::expected 403, got $bad"; fail=1; }
